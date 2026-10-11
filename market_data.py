@@ -13,27 +13,30 @@ load_dotenv()
 api_key = os.getenv("ALPACA_API_KEY")
 secret_key =os.getenv("ALPACA_SECRET_KEY")
 
-# Initialize the client
+# Initialize Historical Data Client
 client = StockHistoricalDataClient(
 	api_key,
 	secret_key
 )
 
-# Create a request for historical SPY
-request = StockBarsRequest(
-	symbol_or_symbols="SPY",
-	timeframe=TimeFrame.Day,
-	start=datetime(2026, 9, 1, tzinfo=timezone.utc),
-	end=datetime(2026, 10, 1, tzinfo=timezone.utc),
-	feed="iex"
-)
-bars = client.get_stock_bars(request)
+def get_closing_prices():
+	# Create a request for historical SPY
+	request = StockBarsRequest(
+		symbol_or_symbols="SPY",
+		timeframe=TimeFrame.Day,
+		start=datetime(2026, 9, 1, tzinfo=timezone.utc),
+		end=datetime(2026, 10, 1, tzinfo=timezone.utc),
+		feed="iex"
+	)
+	bars = client.get_stock_bars(request)
 
-# Collect all closing prices
-closing_prices = []
+	# Collect all closing prices
+	closing_prices = []
 
-for bar in bars["SPY"]:
-	closing_prices.append(bar.close)
+	for bar in bars["SPY"]:
+		closing_prices.append(bar.close)
+
+	return closing_prices
 
 def get_data():
 	url = "https://api.github.com"
@@ -47,7 +50,3 @@ def get_data():
 		print(f"Request failed: {response.status_code}")
 		return None
 
-
-if __name__ == "__main__":
-	data = get_data()
-	print(data.get("current_user_url"))
