@@ -1,6 +1,6 @@
 from market_data import get_closing_prices, get_data
 from strategy import calculate_sma, generate_signal
-
+from backtest import run_backtest
 
 def main():
 
@@ -14,6 +14,8 @@ def main():
 
 	data = get_data()
 	print(data.get("current_user_url"))
+
+	run_backtest(prices)
 
 if __name__ == "__main__":
 	main()
