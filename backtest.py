@@ -1,6 +1,5 @@
 from strategy import generate_signal
 
-
 def run_backtest(prices, initial_cash=10000):
     cash = initial_cash
     shares = 0
@@ -19,7 +18,7 @@ def run_backtest(prices, initial_cash=10000):
             f"Signal: {signal}"
 
         )
-
+        #Log data when buy signal happens
         if signal == "BUY":
             if shares == 0:
                 shares_to_buy = int(cash // prices[i])
@@ -34,6 +33,7 @@ def run_backtest(prices, initial_cash=10000):
                     }
 
                     trades.append(trade)
+        #Log data when sell signal happens
         elif signal == "SELL":
             if shares > 0:
                 cash_to_add = shares * prices[i]
