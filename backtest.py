@@ -4,6 +4,7 @@ def run_backtest(prices, initial_cash=10000):
     cash = initial_cash
     shares = 0
     trades = []
+    equity_curve = []
 
     if len(prices) < 21:
         raise ValueError("At least 21 closing prices required")
@@ -47,7 +48,11 @@ def run_backtest(prices, initial_cash=10000):
                 trades.append(trade)
                 shares = 0
 
+        #Gather information for equity curve
+        daily_portfolio_value = cash + shares * prices[i]
+        equity_curve.append(daily_portfolio_value)
+
     last_price = prices[-1]
     portfolio_value = cash + shares * last_price 
 
-    return cash, shares, portfolio_value, trades
+    return cash, shares, portfolio_value, trades, equity_curve

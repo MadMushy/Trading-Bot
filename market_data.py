@@ -25,7 +25,7 @@ def get_closing_prices():
 		symbol_or_symbols="SPY",
 		timeframe=TimeFrame.Day,
 		start=datetime(2026, 9, 1, tzinfo=timezone.utc),
-		end=datetime(2026, 10, 10, tzinfo=timezone.utc),
+		end=datetime(2026, 10, 13, tzinfo=timezone.utc),
 		feed="iex"
 	)
 	bars = client.get_stock_bars(request)

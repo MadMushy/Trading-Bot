@@ -10,6 +10,9 @@ def main():
     sma = calculate_sma(prices, 5)
     print(f"5-day SMA: ${sma:.2f}")
 
+    l_sma = calculate_sma(prices, 20)
+    print(f"20-day SMA: ${l_sma:.2f}")
+
     signal = generate_signal(prices)
     print(f"Signal For Bot: {signal}")
 
