@@ -19,7 +19,7 @@ def main():
     data = get_data()
     print(data.get("current_user_url"))
 
-    cash, shares, portfolio_value, trades = run_backtest(prices)
+    cash, shares, portfolio_value, trades, equity_curve = run_backtest(prices)
 
     total_return = calculate_return(10000, portfolio_value)
 
