@@ -1,58 +1,65 @@
 from strategy import generate_signal
 
-def run_backtest(prices, initial_cash=10000):
+def run_backtest(closing_prices, opening_prices, initial_cash=10000, verbose=False):
     cash = initial_cash
     shares = 0
     trades = []
     equity_curve = []
 
-    if len(prices) < 21:
+    if len(closing_prices) < 21:
         raise ValueError("At least 21 closing prices required")
 
-	#Will only loop after at least 21 pieces of data
-    for i in range(20, len(prices)):
-        historical_prices = prices[:i + 1]
-        signal = generate_signal(historical_prices)
-        print(
-            f"Day {i + 1} |"
-            f"Current Price: ${prices[i]:.2f} |"
-            f"Signal: {signal}"
+    if len(closing_prices) != len(opening_prices):
+        raise ValueError("Opening and closing prices must have same length.")
 
-        )
-        #Log data when buy signal happens
+	#Will only loop after at least 21 pieces of data
+    for i in range(20, len(closing_prices) - 1):
+        historical_prices = closing_prices[:i + 1]
+        signal = generate_signal(historical_prices)
+        if verbose:
+            print(
+                f"Day {i + 1} |"
+                f"Current Price: ${closing_prices[i]:.2f} |"
+                f"Signal: {signal}"
+
+            )
+        #Log data when buy signal happens and execute trade
+        execution_price = opening_prices[i + 1]
         if signal == "BUY":
             if shares == 0:
-                shares_to_buy = int(cash // prices[i])
-                cash -= shares_to_buy * prices[i]
+                shares_to_buy = int(cash // execution_price)
+                cash -= shares_to_buy * execution_price
                 shares += shares_to_buy
                 if shares_to_buy > 0:
+                    cash -= shares_to_buy * execution_price
+                    shares += shares_to_buy
                     trade = {
-                        "day": i + 1,
+                        "day": i + 2,
                         "action": signal,
-                        "price": prices[i],
+                        "price": execution_price,
                         "shares": shares_to_buy
                     }
 
                     trades.append(trade)
-        #Log data when sell signal happens
+        #Log data when sell signal happens and execute trade
         elif signal == "SELL":
             if shares > 0:
-                cash_to_add = shares * prices[i]
+                cash_to_add = shares * execution_price
                 cash += cash_to_add
                 trade = {
-                    "day": i + 1,
+                    "day": i + 2,
                     "action": signal,
-                    "price": prices[i],
-                    "shares": shares_to_buy
+                    "price": execution_price,
+                    "shares": shares
                 }
                 trades.append(trade)
                 shares = 0
 
         #Gather information for equity curve
-        daily_portfolio_value = cash + shares * prices[i]
+        daily_portfolio_value = cash + shares * closing_prices[i + 1]
         equity_curve.append(daily_portfolio_value)
 
-    last_price = prices[-1]
+    last_price = closing_prices[-1]
     portfolio_value = cash + shares * last_price 
 
     return cash, shares, portfolio_value, trades, equity_curve

@@ -5,22 +5,22 @@ from performance import calculate_return, calculate_max_drawdown
 
 def main():
 
-    prices = get_closing_prices()
+    closing_prices, opening_prices = get_closing_prices()
 
-    sma = calculate_sma(prices, 5)
+    sma = calculate_sma(closing_prices, 5)
     print(f"5-day SMA: ${sma:.2f}")
 
-    l_sma = calculate_sma(prices, 20)
+    l_sma = calculate_sma(closing_prices, 20)
     print(f"20-day SMA: ${l_sma:.2f}")
 
-    signal = generate_signal(prices)
+    signal = generate_signal(closing_prices)
     print(f"Signal For Bot: {signal}")
 
     data = get_data()
     print(data.get("current_user_url"))
 
     initial_cash = 10000
-    cash, shares, portfolio_value, trades, equity_curve = run_backtest(prices)
+    cash, shares, portfolio_value, trades, equity_curve = run_backtest(closing_prices)
     total_return = calculate_return(10000, portfolio_value)
     max_drawdown = calculate_max_drawdown(equity_curve)
 
@@ -38,6 +38,9 @@ def main():
 
     print(f"Total Return: {total_return:.2f}%",
           f"Trades Executed: {len(trades)}")
+
+    print(len(closing_prices))
+    print(len(opening_prices))
 
 if __name__ == "__main__":
 	main()
