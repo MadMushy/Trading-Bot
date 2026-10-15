@@ -28,8 +28,6 @@ def run_backtest(closing_prices, opening_prices, initial_cash=10000, verbose=Fal
         if signal == "BUY":
             if shares == 0:
                 shares_to_buy = int(cash // execution_price)
-                cash -= shares_to_buy * execution_price
-                shares += shares_to_buy
                 if shares_to_buy > 0:
                     cash -= shares_to_buy * execution_price
                     shares += shares_to_buy
