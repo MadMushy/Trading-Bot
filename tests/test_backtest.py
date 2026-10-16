@@ -12,7 +12,7 @@ class TestBackTest(unittest.TestCase):
         self.assertEqual(shares, 0)
         self.assertEqual(portfolio_value, 10000)
         self.assertEqual(trades, [])
-        self.assertEqual(len(equity_curve), 9)
+        self.assertEqual(len(equity_curve), 10)
         self.assertTrue(all(value == 10000 for value in equity_curve))
 
     def test_buy_trade(self):
@@ -32,7 +32,7 @@ class TestBackTest(unittest.TestCase):
         self.assertEqual(len(trades), 1)
         self.assertEqual(trades[0]["price"], 105)
         self.assertEqual(trades[0]["day"], 22)
-        self.assertEqual(len(equity_curve), 1)
+        self.assertEqual(len(equity_curve), 2)
 
     def test_sell_trade(self):
         closing_prices = [100] * 20 + [110, 90, 90, 90]
@@ -51,4 +51,4 @@ class TestBackTest(unittest.TestCase):
         self.assertEqual(len(trades), 2)
         self.assertEqual(trades[0]["action"], "BUY")
         self.assertEqual(trades[1]["action"], "SELL")
-        self.assertEqual(len(equity_curve), 3)
+        self.assertEqual(len(equity_curve), 4)

@@ -4,7 +4,7 @@ def run_backtest(closing_prices, opening_prices, initial_cash=10000, verbose=Fal
     cash = initial_cash
     shares = 0
     trades = []
-    equity_curve = []
+    equity_curve = [initial_cash]
 
     if len(closing_prices) < 21:
         raise ValueError("At least 21 closing prices required")
