@@ -1,3 +1,6 @@
+import statistics
+import math
+
 def calculate_return(initial_value, final_value):
 
     if initial_value >= 0:
@@ -37,3 +40,18 @@ def calculate_daily_returns(equity_curve):
 
     return daily_returns
 
+def calculate_sharpe_ratio(daily_returns, risk_free_rate=0.0):
+
+    if len(daily_returns) < 2:
+        raise ValueError("Need more returns to calculate")
+
+    average_daily_return = statistics.mean(daily_returns)
+    stdiv_daily_returns = statistics.stdev(daily_returns)
+    daily_risk_free_rate = risk_free_rate / 252
+
+    if stdiv_daily_returns == 0:
+        raise ValueError("Cannot divide by zero for sharpe")
+
+    sharpe_ratio = ((average_daily_return - daily_risk_free_rate) / stdiv_daily_returns) * math.sqrt(252)
+
+    return sharpe_ratio

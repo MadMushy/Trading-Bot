@@ -1,5 +1,5 @@
 import unittest
-from performance import calculate_return, calculate_max_drawdown, calculate_daily_returns
+from performance import calculate_return, calculate_max_drawdown, calculate_daily_returns, calculate_sharpe_ratio
 from benchmark import buy_and_hold
 
 
@@ -67,4 +67,34 @@ class TestPerformance(unittest.TestCase):
 
         self.assertAlmostEqual(result[0], .02)
         self.assertAlmostEqual(result[1], -0.00980392156862745)
+
+    def test_sharpe_ratio_1(self):
+
+        daily_returns = [.01, -.01, .02, 0.0]
+
+        sharpe_ratio = calculate_sharpe_ratio(daily_returns, risk_free_rate=0.0)
+
+        self.assertAlmostEqual(sharpe_ratio, 6.148170459575759)
+
+    def test_sharpe_ratio_2(self):
+
+        daily_returns = [.01, -.01, .02, 0.0]
+
+        sharpe_ratio = calculate_sharpe_ratio(daily_returns, risk_free_rate=.04)
+
+        self.assertAlmostEqual(sharpe_ratio, 5.952990444986053)
+
+    def test_sharpe_ratio_valueerror_1(self):
+
+        daily_returns = [.01, .01, .01]
+
+        with self.assertRaises(ValueError):
+            calculate_sharpe_ratio(daily_returns)
+
+    def test_sharpe_ratio_valueError_2(self):
+
+        daily_returns = [.01]
+
+        with self.assertRaises(ValueError):
+            calculate_sharpe_ratio(daily_returns)
 
