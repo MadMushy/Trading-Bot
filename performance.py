@@ -23,3 +23,17 @@ def calculate_max_drawdown(equity_curve):
                 max_drawdown = calculate_drawdown
 
     return max_drawdown
+
+def calculate_daily_returns(equity_curve):
+
+    if equity_curve == []:
+        raise ValueError("No data avalible for processing")
+
+    daily_returns = []
+
+    for i in range(1, len(equity_curve)):
+        daily_return = (equity_curve[i] - equity_curve[i-1]) / equity_curve[i-1]
+        daily_returns.append(daily_return)
+
+    return daily_returns
+

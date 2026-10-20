@@ -1,5 +1,5 @@
 import unittest
-from performance import calculate_return, calculate_max_drawdown
+from performance import calculate_return, calculate_max_drawdown, calculate_daily_returns
 from benchmark import buy_and_hold
 
 
@@ -54,8 +54,17 @@ class TestPerformance(unittest.TestCase):
         closing_prices = [100] * 20 + [110, 110, 130]
         opening_prices = [100] * 20 + [110, 105, 125]
 
-        portfolio_value_final, percent_return = buy_and_hold(opening_prices, closing_prices, initial_cash=10000)
+        portfolio_value_final, percent_return, equity_curve = buy_and_hold(opening_prices, closing_prices, initial_cash=10000)
 
         self.assertEqual(portfolio_value_final, 12375)
         self.assertEqual(percent_return, 23.75)
+
+    def test_daily_returns(self):
+        
+        equity_curve = [10000, 10200, 10100]
+
+        result = calculate_daily_returns(equity_curve)
+
+        self.assertAlmostEqual(result[0], .02)
+        self.assertAlmostEqual(result[1], -0.00980392156862745)
 
