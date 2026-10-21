@@ -1,6 +1,13 @@
 from strategy import generate_signal
 
-def run_backtest(closing_prices, opening_prices, initial_cash=10000, verbose=False):
+def run_backtest(
+        closing_prices, 
+        opening_prices, 
+        initial_cash=10000, 
+        verbose=False,
+        slippage=0.0
+
+    ):
     cash = initial_cash
     shares = 0
     trades = []
@@ -26,28 +33,30 @@ def run_backtest(closing_prices, opening_prices, initial_cash=10000, verbose=Fal
         #Log data when buy signal happens and execute trade
         execution_price = opening_prices[i + 1]
         if signal == "BUY":
+            adjusted_execution_price = execution_price + (execution_price * slippage)
             if shares == 0:
-                shares_to_buy = int(cash // execution_price)
+                shares_to_buy = int(cash // adjusted_execution_price)
                 if shares_to_buy > 0:
-                    cash -= shares_to_buy * execution_price
+                    cash -= shares_to_buy * adjusted_execution_price
                     shares += shares_to_buy
                     trade = {
                         "day": i + 2,
                         "action": signal,
-                        "price": execution_price,
+                        "price": adjusted_execution_price,
                         "shares": shares_to_buy
                     }
 
                     trades.append(trade)
         #Log data when sell signal happens and execute trade
         elif signal == "SELL":
+            adjusted_execution_price = execution_price - (execution_price * slippage)
             if shares > 0:
-                cash_to_add = shares * execution_price
+                cash_to_add = shares * adjusted_execution_price
                 cash += cash_to_add
                 trade = {
                     "day": i + 2,
                     "action": signal,
-                    "price": execution_price,
+                    "price": adjusted_execution_price,
                     "shares": shares
                 }
                 trades.append(trade)
