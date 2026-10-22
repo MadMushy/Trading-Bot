@@ -5,7 +5,8 @@ def run_backtest(
         opening_prices, 
         initial_cash=10000, 
         verbose=False,
-        slippage=0.0
+        slippage=0.0,
+        transaction_fee=0.0
 
     ):
     cash = initial_cash
@@ -33,9 +34,10 @@ def run_backtest(
         #Log data when buy signal happens and execute trade
         execution_price = opening_prices[i + 1]
         if signal == "BUY":
+            avalible_cash = cash - transaction_fee
             adjusted_execution_price = execution_price + (execution_price * slippage)
             if shares == 0:
-                shares_to_buy = int(cash // adjusted_execution_price)
+                shares_to_buy = int(avalible_cash // adjusted_execution_price)
                 if shares_to_buy > 0:
                     cash -= shares_to_buy * adjusted_execution_price
                     shares += shares_to_buy
@@ -49,6 +51,7 @@ def run_backtest(
                     trades.append(trade)
         #Log data when sell signal happens and execute trade
         elif signal == "SELL":
+            avalible_cash = cash - transaction_fee
             adjusted_execution_price = execution_price - (execution_price * slippage)
             if shares > 0:
                 cash_to_add = shares * adjusted_execution_price
