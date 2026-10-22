@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+from alpaca.data.enums import Adjustment
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
