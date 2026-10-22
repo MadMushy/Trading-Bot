@@ -25,7 +25,8 @@ def get_closing_prices():
         timeframe=TimeFrame.Day,
         start=datetime(2022, 9, 1, tzinfo=timezone.utc),
         end=datetime(2026, 10, 13, tzinfo=timezone.utc),
-        feed="iex"
+        feed="iex",
+        adjustment=Adjustment.RAW
     )
     bars = client.get_stock_bars(request)
 

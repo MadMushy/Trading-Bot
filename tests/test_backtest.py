@@ -91,3 +91,47 @@ class TestBackTest(unittest.TestCase):
         self.assertAlmostEqual(cash, 31.30)
         self.assertAlmostEqual(portfolio_value, 11311.30)
 
+    def test_backtest_transaction_fee(self):
+
+        closing_prices = [100] * 20 + [110, 120]
+        opening_prices = [100] * 20 + [110, 105]
+
+        cash, shares, portfolio_value, trades, equity_curve = run_backtest(closing_prices, opening_prices, transaction_fee=5.0)
+
+        self.assertAlmostEqual(trades[0]["price"], 105.00)
+        self.assertEqual(shares, 95)
+        self.assertAlmostEqual(cash, 20.00)
+        self.assertAlmostEqual(portfolio_value, 11420.00)
+
+    def test_backtest_transaction_fee_2(self):
+
+        closing_prices = [100] * 20 + [110, 90, 90, 90]
+        opening_prices = [100] * 20 + [110, 90, 90, 90]
+
+        cash, shares, portfolio_value, trades, equity_curve = run_backtest(closing_prices, opening_prices, transaction_fee=5.0)
+
+        self.assertEqual(trades[0]["shares"], 111)
+        self.assertAlmostEqual(trades[0]["price"], 90)
+        self.assertAlmostEqual(trades[0]["cash"], 5)
+        self.assertAlmostEqual(trades[1]["price"], 90)
+        self.assertAlmostEqual(trades[1]["cash"], 9990)
+        self.assertAlmostEqual(portfolio_value, 9990)
+
+    def test_backtest_transaction_fee_valueerror(self):
+
+        opening_prices = [100] * 20 + [50, 60]
+        closing_prices = [100] * 20 + [50, 60]
+
+        with self.assertRaises(ValueError):
+            run_backtest(closing_prices, opening_prices, transaction_fee=-5.0)
+
+    def test_buy_and_hold_slippage_transaction_fee(self):
+
+        closing_prices = [100] * 20 + [110, 120]
+        opening_prices = [100] * 20 + [110, 105]
+
+        portfolio_value_final, percent_return, equity_curve = buy_and_hold(opening_prices, closing_prices, slippage=.01, transaction_fee=5.0)
+
+        self.assertAlmostEqual(portfolio_value_final, 11306.30)
+        self.assertAlmostEqual(percent_return, 13.063)
+

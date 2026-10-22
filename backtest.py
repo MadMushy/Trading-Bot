@@ -19,6 +19,10 @@ def run_backtest(
 
     if len(closing_prices) != len(opening_prices):
         raise ValueError("Opening and closing prices must have same length.")
+    
+    if transaction_fee < 0:
+        raise ValueError("Transaction fee cannot be negative")
+
 
 	#Will only loop after at least 21 pieces of data
     for i in range(20, len(closing_prices) - 1):
@@ -39,13 +43,14 @@ def run_backtest(
             if shares == 0:
                 shares_to_buy = int(avalible_cash // adjusted_execution_price)
                 if shares_to_buy > 0:
-                    cash -= shares_to_buy * adjusted_execution_price
+                    cash -= (shares_to_buy * adjusted_execution_price) + transaction_fee
                     shares += shares_to_buy
                     trade = {
                         "day": i + 2,
                         "action": signal,
                         "price": adjusted_execution_price,
-                        "shares": shares_to_buy
+                        "shares": shares_to_buy,
+                        "cash": cash
                     }
 
                     trades.append(trade)
@@ -54,13 +59,14 @@ def run_backtest(
             avalible_cash = cash - transaction_fee
             adjusted_execution_price = execution_price - (execution_price * slippage)
             if shares > 0:
-                cash_to_add = shares * adjusted_execution_price
+                cash_to_add = shares * adjusted_execution_price - transaction_fee
                 cash += cash_to_add
                 trade = {
                     "day": i + 2,
                     "action": signal,
                     "price": adjusted_execution_price,
-                    "shares": shares
+                    "shares": shares,
+                    "cash": cash
                 }
                 trades.append(trade)
                 shares = 0
