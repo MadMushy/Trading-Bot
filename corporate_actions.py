@@ -16,6 +16,9 @@ def record_dividend_entitlement(
         payment_date
     ):
 
+    if dividend_per_share < 0:
+        raise ValueError("Dividend can not be negative")
+
     #Calculate payment
     payment = calculate_dividend_payment(shares, dividend_per_share)
 
@@ -29,3 +32,20 @@ def record_dividend_entitlement(
         pending_dividends.append(record)
 
     return pending_dividends
+
+def process_dividend_payments(pending_dividends, current_date, cash):
+    updated_pending_dividends = []
+
+    if cash < 0:
+        raise ValueError("Cash balance cannot be negative")
+
+    for dividend in pending_dividends:
+        if dividend["amount"] < 0:
+            raise ValueError("Dividend cannot be negative")
+
+        if dividend["payment_date"] <= current_date:
+            cash += dividend["amount"]
+        else:
+            updated_pending_dividends.append(dividend)
+
+    return cash, updated_pending_dividends
