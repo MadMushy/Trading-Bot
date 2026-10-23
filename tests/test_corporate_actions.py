@@ -1,6 +1,6 @@
 import unittest
 
-from corporate_actions import calculate_dividend_payment, record_dividend_entitlement
+from corporate_actions import calculate_dividend_payment, record_dividend_entitlement, process_dividend_payments
 
 class TestCorporateActions(unittest.TestCase):
     def test_corporate_actions_1(self):
@@ -65,3 +65,17 @@ class TestCorporateActions(unittest.TestCase):
         pending_dividends = record_dividend_entitlement(pending_dividends, shares, dividend_per_share, payment_date)
 
         self.assertEqual(len(pending_dividends), 2)
+
+    def test_process_dividend_payments_2_payments(self):
+
+        pending_dividends = [
+            {"payment_date": "2026-06-30", "amount": 87.50},
+            {"payment_date": "2026-09-30", "amount": 90.00}
+        ]
+        cash = 1000
+        current_date = "2026-10-20"
+
+        cash, updated_dividends = process_dividend_payments(pending_dividends, current_date, cash)
+
+        self.assertAlmostEqual(cash, 1177.50)
+        self.assertEqual(len(updated_dividends), 0)
