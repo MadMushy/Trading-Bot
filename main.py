@@ -6,7 +6,7 @@ from benchmark import buy_and_hold
 
 def main():
 
-    closing_prices, opening_prices = get_closing_prices()
+    closing_prices, opening_prices, trading_dates = get_closing_prices()
 
     sma = calculate_sma(closing_prices, 5)
     print(f"5-day SMA: ${sma:.2f}")
@@ -22,7 +22,7 @@ def main():
 
     initial_cash = 10000
     #Cross over strat
-    cash, shares, portfolio_value, trades, equity_curve = run_backtest(closing_prices, opening_prices, slippage=0)
+    cash, shares, portfolio_value, trades, equity_curve = run_backtest(closing_prices, opening_prices, slippage=0, dates=trading_dates)
     total_return = calculate_return(10000, portfolio_value)
     max_drawdown = calculate_max_drawdown(equity_curve)
     

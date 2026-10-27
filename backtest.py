@@ -1,4 +1,5 @@
 from strategy import generate_signal
+from corporate_actions import record_dividend_entitlement, process_dividend_payments
 
 def run_backtest(
         closing_prices, 
@@ -6,13 +7,16 @@ def run_backtest(
         initial_cash=10000, 
         verbose=False,
         slippage=0.0,
-        transaction_fee=0.0
+        transaction_fee=0.0,
+        dates=None,
+        dividend_events=None
 
     ):
     cash = initial_cash
     shares = 0
     trades = []
     equity_curve = [initial_cash]
+    pending_dividends = []
 
     if len(closing_prices) < 21:
         raise ValueError("At least 21 closing prices required")
@@ -22,6 +26,10 @@ def run_backtest(
     
     if transaction_fee < 0:
         raise ValueError("Transaction fee cannot be negative")
+
+    if dates is not None:
+        if len(closing_prices) != len(dates):
+            raise ValueError("Closing prices and dates must match")
 
 
 	#Will only loop after at least 21 pieces of data

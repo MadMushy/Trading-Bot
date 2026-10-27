@@ -79,3 +79,41 @@ class TestCorporateActions(unittest.TestCase):
 
         self.assertAlmostEqual(cash, 1177.50)
         self.assertEqual(len(updated_dividends), 0)
+
+    def test_process_dividend_payments_1_payment(self):
+
+        pending_dividends = [{"payment_date": "2026-06-30", "amount": 87.50}]
+        cash = 1000
+        current_date = "2026-10-20"
+
+        cash, remaining = process_dividend_payments(pending_dividends, current_date, cash)
+
+        self.assertAlmostEqual(cash, 1087.50)
+        self.assertAlmostEqual(len(remaining), 0)
+
+    def test_process_dividend_payments_future_payment(self):
+
+        pending_dividends = [{"payment_date": "2026-06-30", "amount": 87.50}]
+        cash = 1000
+        current_date = "2026-06-20"
+
+        cash, remaining = process_dividend_payments(pending_dividends, current_date, cash)
+
+        self.assertAlmostEqual(cash, 1000)
+        self.assertAlmostEqual(len(remaining), 1)
+
+    def test_process_dividend_payments_1_payment_1_future(self):
+
+        pending_dividends = [
+            {"payment_date": "2026-06-30", "amount": 87.50},
+            {"payment_date": "2026-09-30", "amount": 90.00}
+        ]
+        cash = 1000
+        current_date = "2026-08-20"
+
+        cash, updated_dividends = process_dividend_payments(pending_dividends, current_date, cash)
+
+        self.assertAlmostEqual(cash, 1087.50)
+        self.assertEqual(len(updated_dividends), 1)
+
+

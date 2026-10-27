@@ -31,15 +31,17 @@ def get_closing_prices():
     )
     bars = client.get_stock_bars(request)
 
-    # Collect all closing prices and opening prices
+    # Collect all closing prices and opening prices and trading dates
     closing_prices = []
     opening_prices = []
+    trading_dates = []
 
     for bar in bars["SPY"]:
         closing_prices.append(bar.close)
         opening_prices.append(bar.open)
+        trading_dates.append(bar.timestamp.date().isoformat())
 
-    return closing_prices, opening_prices
+    return closing_prices, opening_prices, trading_dates
 
 def get_data():
     url = "https://api.github.com"
