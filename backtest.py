@@ -43,6 +43,29 @@ def run_backtest(
                 f"Signal: {signal}"
 
             )
+
+        #Dividend entitlement check
+        if dates is not None:
+            current_date = dates[i + 1]
+            
+            #Entitlement recording
+            if dividend_events is not None:
+                for event in dividend_events:
+                    if current_date == event["ex_date"] and shares > 0:
+                        pending_dividends = record_dividend_entitlement(
+                                pending_dividends,
+                                shares,
+                                event["amount_per_share"],
+                                event["payment_date"]
+                        )
+            #If there are bending dividends pay them
+            cash, pending_dividends = process_dividend_payments(
+                pending_dividends,
+                current_date,
+                cash
+            ) 
+
+
         #Log data when buy signal happens and execute trade
         execution_price = opening_prices[i + 1]
         if signal == "BUY":

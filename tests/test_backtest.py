@@ -135,3 +135,25 @@ class TestBackTest(unittest.TestCase):
         self.assertAlmostEqual(portfolio_value_final, 11306.30)
         self.assertAlmostEqual(percent_return, 13.063)
 
+    def test_backtest_with_trades_matching(self):
+
+        closing_prices = [100] * 20 + [110, 120]
+        opening_prices = [100] * 20 + [110, 105]
+        trades = [100] * 22
+
+        cash, shares, portfolio_value, trades, equity_curve = run_backtest(closing_prices, opening_prices, slippage=0.01, dates=trades)
+
+        self.assertAlmostEqual(trades[0]["price"], 106.05)
+        self.assertEqual(shares, 94)
+        self.assertAlmostEqual(cash, 31.30)
+        self.assertAlmostEqual(portfolio_value, 11311.30)
+
+    def test_backtest_with_trades_valueerror(self):
+
+        closing_prices = [100] * 20 + [110, 120]
+        opening_prices = [100] * 20 + [110, 105]
+        trades = [100] * 21
+
+        with self.assertRaises(ValueError):
+            run_backtest(closing_prices, opening_prices, slippage=0.01, dates=trades)
+
