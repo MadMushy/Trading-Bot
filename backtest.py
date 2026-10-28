@@ -38,10 +38,9 @@ def run_backtest(
         signal = generate_signal(historical_prices)
         if verbose:
             print(
-                f"Day {i + 1} |"
+                f"Date: {dates[i + 1]} |"
                 f"Current Price: ${closing_prices[i]:.2f} |"
                 f"Signal: {signal}"
-
             )
 
         #Dividend entitlement check
@@ -63,8 +62,7 @@ def run_backtest(
                 pending_dividends,
                 current_date,
                 cash
-            ) 
-
+            )
 
         #Log data when buy signal happens and execute trade
         execution_price = opening_prices[i + 1]
@@ -78,6 +76,7 @@ def run_backtest(
                     shares += shares_to_buy
                     trade = {
                         "day": i + 2,
+                        "date": dates[i + 1] if dates is not None else None,
                         "action": signal,
                         "price": adjusted_execution_price,
                         "shares": shares_to_buy,
@@ -94,6 +93,7 @@ def run_backtest(
                 cash += cash_to_add
                 trade = {
                     "day": i + 2,
+                    "date": dates[i + 1] if dates is not None else None,
                     "action": signal,
                     "price": adjusted_execution_price,
                     "shares": shares,

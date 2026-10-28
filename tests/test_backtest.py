@@ -1,6 +1,7 @@
 import unittest
 from backtest import run_backtest
 from benchmark import buy_and_hold
+from datetime import date, timedelta
 
 class TestBackTest(unittest.TestCase):
     def test_no_trades(self):
@@ -157,3 +158,84 @@ class TestBackTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_backtest(closing_prices, opening_prices, slippage=0.01, dates=trades)
 
+    def test_backtest_with_dividends(self):
+
+        closing_prices = [100] * 20 + [110] * 15
+        opening_prices = closing_prices.copy()
+        start_date = date(2026, 10, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(closing_prices))
+        ]
+        dividend_event = [
+            {
+                "ex_date": dates[23],
+                "payment_date": dates[27],
+                "amount_per_share": 1.50
+            }
+        ]
+        result = run_backtest(
+            closing_prices,
+            opening_prices,
+            initial_cash=10000,
+            dates=dates,
+            dividend_events=dividend_event
+
+        )
+        
+        self.assertAlmostEqual(result[0], 235)
+
+    def test_backtest_with_dividends_buy_on_ex_date(self):
+
+        closing_prices = [100] * 20 + [110] * 15
+        opening_prices = closing_prices.copy()
+        start_date = date(2026, 10, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(closing_prices))
+        ]
+        dividend_event = [
+            {
+                "ex_date": dates[21],
+                "payment_date": dates[25],
+                "amount_per_share": 1.50
+            }
+        ]
+        result = run_backtest(
+            closing_prices,
+            opening_prices,
+            initial_cash=10000,
+            dates=dates,
+            dividend_events=dividend_event
+
+        )
+        
+        self.assertAlmostEqual(result[0], 100)
+
+    def test_backtest_with_dividends_sell_on_ex_date(self):
+
+        closing_prices = [100] * 20 + [110] * 10 + [90] * 10
+        opening_prices = closing_prices.copy()
+        start_date = date(2026, 10, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(closing_prices))
+        ]
+        dividend_event = [
+            {
+                "ex_date": dates[32],
+                "payment_date": dates[35],
+                "amount_per_share": 1.50
+            }
+        ]
+        result = run_backtest(
+            closing_prices,
+            opening_prices,
+            initial_cash=10000,
+            dates=dates,
+            dividend_events=dividend_event
+
+        )
+        
+        self.assertAlmostEqual(result[0], 8335.0)
+        self.assertEqual(result[1], 0)
