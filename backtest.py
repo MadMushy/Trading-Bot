@@ -38,7 +38,8 @@ def run_backtest(
         signal = generate_signal(historical_prices)
         if verbose:
             print(
-                f"Date: {dates[i + 1]} |"
+                f"Signal Date: {dates[i]} |"
+                f"Execution date: {dates[i + 1]} |"
                 f"Current Price: ${closing_prices[i]:.2f} |"
                 f"Signal: {signal}"
             )

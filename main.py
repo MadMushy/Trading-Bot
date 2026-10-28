@@ -59,8 +59,6 @@ def main():
     print(f"Total Return: {total_return:.2f}%",
           f"Trades Executed: {len(trades)}")
 
-    print(len(closing_prices))
-    print(len(opening_prices))
 
 if __name__ == "__main__":
 	main()
