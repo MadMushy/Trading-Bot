@@ -49,3 +49,12 @@ def process_dividend_payments(pending_dividends, current_date, cash):
             updated_pending_dividends.append(dividend)
 
     return cash, updated_pending_dividends
+
+def apply_stock_split(shares, split_ratio):
+
+    if split_ratio <= 0:
+        raise ValueError("Split ration cannot be less than or equal to zero")
+
+    new_shares = shares * split_ratio
+
+    return new_shares
