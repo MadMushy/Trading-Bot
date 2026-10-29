@@ -1,6 +1,6 @@
 import unittest
 
-from corporate_actions import calculate_dividend_payment, record_dividend_entitlement, process_dividend_payments
+from corporate_actions import calculate_dividend_payment, record_dividend_entitlement, process_dividend_payments, apply_stock_split
 
 class TestCorporateActions(unittest.TestCase):
     def test_corporate_actions_1(self):
@@ -115,5 +115,11 @@ class TestCorporateActions(unittest.TestCase):
 
         self.assertAlmostEqual(cash, 1087.50)
         self.assertEqual(len(updated_dividends), 1)
+
+    def test_stock_split(self):
+
+        result = apply_stock_split(25,5)
+
+        self.assertEqual(result, 125)
 
 
