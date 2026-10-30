@@ -1,5 +1,5 @@
 from strategy import generate_signal
-from corporate_actions import record_dividend_entitlement, process_dividend_payments
+from corporate_actions import record_dividend_entitlement, process_dividend_payments, apply_stock_split
 
 def run_backtest(
         closing_prices, 
@@ -9,7 +9,8 @@ def run_backtest(
         slippage=0.0,
         transaction_fee=0.0,
         dates=None,
-        dividend_events=None
+        dividend_events=None,
+        split_events=None
 
     ):
     cash = initial_cash
@@ -58,6 +59,16 @@ def run_backtest(
                                 event["amount_per_share"],
                                 event["payment_date"]
                         )
+           
+            #Check for split events
+            if split_events is not None:
+                for event in split_events:
+                    if current_date == event["ex_date"] and shares > 0:
+                        shares = apply_stock_split(
+                                shares,
+                                event["split_ratio"]
+                        )
+
             #If there are bending dividends pay them
             cash, pending_dividends = process_dividend_payments(
                 pending_dividends,

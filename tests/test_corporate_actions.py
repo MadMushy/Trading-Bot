@@ -53,7 +53,7 @@ class TestCorporateActions(unittest.TestCase):
 
         self.assertEqual(len(pending_dividends), 0)
 
-    def test_dividend_entitlement_2(self):
+    def test_dividend_entitlement_3(self):
 
         shares = 50
         dividend_per_share = 1.75
