@@ -58,3 +58,15 @@ def apply_stock_split(shares, split_ratio):
     new_shares = shares * split_ratio
 
     return new_shares
+
+def adjust_prices_for_splits(prices, dates, split_events):
+    adj_prices = prices.copy()
+
+    for date in dates:
+        for price in adj_prices:
+            if date not split_events["ex_date"]:
+                price = price / split_events["ex_date"]
+            else:
+                price = price
+
+    return adj_prices

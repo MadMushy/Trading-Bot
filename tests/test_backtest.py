@@ -2,6 +2,7 @@ import unittest
 from backtest import run_backtest
 from benchmark import buy_and_hold
 from datetime import date, timedelta
+from corporate_actions import apply_stock_split
 
 class TestBackTest(unittest.TestCase):
     def test_no_trades(self):
@@ -239,3 +240,35 @@ class TestBackTest(unittest.TestCase):
         
         self.assertAlmostEqual(result[0], 8335.0)
         self.assertEqual(result[1], 0)
+
+    def test_backtest_with_stock_split(self):
+
+        closing_prices = [100] * 20 + [110] * 10
+        opening_prices = closing_prices.copy()
+        start_date = date(2026, 6, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(closing_prices))
+        ]
+        split_events = [
+            {
+                "ex_date": "2026-06-25",
+                "split_ratio": 2
+            }
+        ]
+        result = run_backtest(
+            closing_prices,
+            opening_prices,
+            initial_cash=10000,
+            dates=dates,
+            split_events=split_events
+
+        )
+        
+        for i, trading_date in enumerate(dates):
+            print(i, trading_date)
+
+        self.assertAlmostEqual(result[1], 180)
+        self.assertEqual(result[0], 100)
+
+
