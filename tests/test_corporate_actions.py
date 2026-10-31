@@ -175,4 +175,4 @@ class TestCorporateActions(unittest.TestCase):
             )
 
         print(result)
-        self.assertEqual(result[0], 50)
+        self.assertEqual(result, [50, 50, 50, 50, 50])

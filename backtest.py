@@ -1,5 +1,5 @@
 from strategy import generate_signal
-from corporate_actions import record_dividend_entitlement, process_dividend_payments, apply_stock_split
+from corporate_actions import record_dividend_entitlement, process_dividend_payments, apply_stock_split, adjust_prices_for_splits
 
 def run_backtest(
         closing_prices, 
@@ -35,8 +35,26 @@ def run_backtest(
 
 	#Will only loop after at least 21 pieces of data
     for i in range(20, len(closing_prices) - 1):
+        adjusted_split_events = []
+        
+        #Identify split events already occured
+        if dates is not None:
+            for event in split_events:
+                if event["ex_date"] <= dates[i]:
+                    adjusted_split_events.append[event]
+        
+        #Get historical prices
         historical_prices = closing_prices[:i + 1]
-        signal = generate_signal(historical_prices)
+        
+        #Adjust historical prices based on appliciable splits
+        adj_historical_prices = adjust_prices_for_splits(
+                historical_prices,
+                dates,
+                adjusted_split_events
+            )
+
+        #Generate signal from adjusted prices
+        signal = generate_signal(adj_historical_prices)
         if verbose:
             print(
                 f"Signal Date: {dates[i]} |"
