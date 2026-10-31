@@ -1,6 +1,7 @@
 import unittest
 
-from corporate_actions import calculate_dividend_payment, record_dividend_entitlement, process_dividend_payments, apply_stock_split
+from corporate_actions import calculate_dividend_payment, record_dividend_entitlement, process_dividend_payments, apply_stock_split, adjust_prices_for_splits
+from datetime import date, timedelta
 
 class TestCorporateActions(unittest.TestCase):
     def test_corporate_actions_1(self):
@@ -122,4 +123,27 @@ class TestCorporateActions(unittest.TestCase):
 
         self.assertEqual(result, 125)
 
+    def test_adjust_prices_for_splits(self):
 
+        prices = [200, 200, 200, 100, 100]
+        start_date = date(2026, 10, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(prices))
+        ]
+        split_events = [
+            {
+                "ex_date": dates[3],
+                "split_ratio": 2.0
+
+            }
+        ]
+       
+        result = adjust_prices_for_splits(
+                prices=prices,
+                dates=dates,
+                split_events=split_events
+            )
+
+        print(result)
+        self.assertEqual(result[0], 100)

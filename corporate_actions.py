@@ -62,13 +62,12 @@ def apply_stock_split(shares, split_ratio):
 def adjust_prices_for_splits(prices, dates, split_events):
     adj_prices = prices.copy()
 
-    for date in dates:
-        for i in range(len(prices))
-            #Acessing a list so index like so
-            if date[i] < split_events[0]["ex_date"]:
-                #Updste adjusted prices based on index
-                adj_prices[i] = adj_prices[i] / split_events[0]["split_ratio"]
-            else:
-                adj_prices[i] = adj_prices[i]
+    for i in range(len(adj_prices)):
+        #Acessing a list so index like so
+        if dates[i] < split_events[0]["ex_date"]:
+            #Updste adjusted prices based on index
+            adj_prices[i] = adj_prices[i] / split_events[0]["split_ratio"]
+        else:
+            adj_prices[i] = adj_prices[i]
 
     return adj_prices
