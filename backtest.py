@@ -38,20 +38,23 @@ def run_backtest(
         adjusted_split_events = []
         
         #Identify split events already occured
-        if dates is not None:
+        if split_events is not None:
             for event in split_events:
                 if event["ex_date"] <= dates[i]:
-                    adjusted_split_events.append[event]
+                    adjusted_split_events.append(event)
         
         #Get historical prices
         historical_prices = closing_prices[:i + 1]
         
+        adj_historical_prices = historical_prices
+        
         #Adjust historical prices based on appliciable splits
-        adj_historical_prices = adjust_prices_for_splits(
-                historical_prices,
-                dates,
-                adjusted_split_events
-            )
+        if dates is not None:
+            adj_historical_prices = adjust_prices_for_splits(
+                    historical_prices,
+                    dates,
+                    adjusted_split_events
+                )
 
         #Generate signal from adjusted prices
         signal = generate_signal(adj_historical_prices)

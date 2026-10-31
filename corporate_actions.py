@@ -68,7 +68,5 @@ def adjust_prices_for_splits(prices, dates, split_events):
             if dates[i] < event["ex_date"]:
                 #Updste adjusted prices based on index
                 adj_prices[i] = adj_prices[i] / event["split_ratio"]
-            else:
-                adj_prices[i] = adj_prices[i]
 
     return adj_prices
