@@ -148,7 +148,7 @@ class TestCorporateActions(unittest.TestCase):
         print(result)
         self.assertEqual(result[0], 100)
 
-    def test_adjust_prices_for_splits(self):
+    def test_adjust_prices_for_splits_multiple(self):
 
         prices = [400, 400, 200, 200, 50]
         start_date = date(2026, 10, 1)
