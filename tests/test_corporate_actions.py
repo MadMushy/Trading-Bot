@@ -147,3 +147,32 @@ class TestCorporateActions(unittest.TestCase):
 
         print(result)
         self.assertEqual(result[0], 100)
+
+    def test_adjust_prices_for_splits(self):
+
+        prices = [400, 400, 200, 200, 50]
+        start_date = date(2026, 10, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(prices))
+        ]
+        split_events = [
+            {
+                "ex_date": dates[2],
+                "split_ratio": 2
+
+            },
+            {
+                "ex_date": dates[4],
+                "split_ratio": 4
+            }
+        ]
+       
+        result = adjust_prices_for_splits(
+                prices=prices,
+                dates=dates,
+                split_events=split_events
+            )
+
+        print(result)
+        self.assertEqual(result[0], 50)
