@@ -271,4 +271,74 @@ class TestBackTest(unittest.TestCase):
         self.assertAlmostEqual(result[1], 180)
         self.assertEqual(result[0], 100)
 
+    def test_backtest_with_stock_split_no_false_signal(self):
+
+        closing_prices = [200] * 25 + [100] * 10
+        opening_prices = closing_prices.copy()
+        start_date = date(2026, 6, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(closing_prices))
+        ]
+        split_events = [
+            {
+                "ex_date": dates[25],
+                "split_ratio": 2
+            }
+        ]
+        result = run_backtest(
+            closing_prices,
+            opening_prices,
+            initial_cash=10000,
+            dates=dates,
+            split_events=split_events
+
+        )
+
+        self.assertAlmostEqual(result[0], 10000)
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[1], 0)
+
+    def test_backtest_with_and_without_split(self):
+
+        closing_prices = [200] * 25 + [110] * 5 + [55] * 5
+        opening_prices = closing_prices.copy()
+        start_date = date(2026, 6, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(closing_prices))
+        ]
+        split_events = [
+            {
+                "ex_date": dates[25],
+                "split_ratio": 2
+            }
+        ]
+
+        result_with_split = run_backtest(
+            closing_prices,
+            opening_prices,
+            initial_cash=10000,
+            dates=dates,
+            split_events=split_events
+
+        )
+        result_without_split = run_backtest(
+            closing_prices,
+            opening_prices,
+            initial_cash=10000
+        )
+
+        trades_with_split_event = [
+                trade for trade in result_with_split[3]
+                if trade["date"] < split_events[0]["ex_date"]
+        ]
+        trades_without_split = [
+                trade for trade in result_without_split[3]
+                if trade["date"] < split_events[0]["ex_date"]
+        ]
+
+        self.assertEqual(trades_with_split_event, trades_without_split)
+
+
 
