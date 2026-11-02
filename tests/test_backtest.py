@@ -363,5 +363,32 @@ class TestBackTest(unittest.TestCase):
                 split_events=split_events
             )
 
+    def test_split_preserves_portfolio_value(self):
+
+        closing_prices = [100] * 20 + [110] * 5 + [55] * 10
+        opening_prices = closing_prices.copy()
+        start_date = date(2026, 6, 1)
+        dates = [
+        (start_date + timedelta(days=i)).isoformat()
+        for i in range(len(closing_prices))
+        ]
+        split_events = [
+            {
+                "ex_date": dates[25],
+                "split_ratio": 2
+            }
+        ]
+
+        cash, shares, portfolio_value, trades, equity_curve = run_backtest(
+            closing_prices,
+            opening_prices,
+            initial_cash=10000,
+            dates=dates,
+            split_events=split_events
+
+        )
+
+        self.assertAlmostEqual(equity_curve[4], equity_curve[5])
+
 
 
