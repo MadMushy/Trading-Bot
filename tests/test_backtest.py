@@ -293,7 +293,7 @@ class TestBackTest(unittest.TestCase):
             dates=dates,
             split_events=split_events
 
-        )
+        ) 
 
         self.assertAlmostEqual(result[0], 10000)
         self.assertEqual(result[3], [])
@@ -341,6 +341,27 @@ class TestBackTest(unittest.TestCase):
 
         self.assertEqual(trades_with_split_event, trades_without_split)
         self.assertGreater(len(trades_with_split_event), 0)
+
+    def test_backtest_with_split_no_dates(self):
+
+        closing_prices = [200] * 25 + [100] * 10
+        opening_prices = closing_prices.copy()
+        start_date = date(2026, 6, 1)
+        split_events = [
+            {
+                "ex_date": "2026-6-1",
+                "split_ratio": 2
+            }
+        ]
+
+        with self.assertRaises(ValueError):
+            run_backtest(
+                closing_prices,
+                opening_prices,
+                initial_cash=10000,
+                dates=None,
+                split_events=split_events
+            )
 
 
 

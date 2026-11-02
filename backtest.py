@@ -32,6 +32,9 @@ def run_backtest(
         if len(closing_prices) != len(dates):
             raise ValueError("Closing prices and dates must match")
 
+    if split_events is not None and dates is None:
+        raise ValueError("If you provide split events you need dates")
+
 
 	#Will only loop after at least 21 pieces of data
     for i in range(20, len(closing_prices) - 1):
