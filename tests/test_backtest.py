@@ -301,7 +301,7 @@ class TestBackTest(unittest.TestCase):
 
     def test_backtest_with_and_without_split(self):
 
-        closing_prices = [200] * 25 + [110] * 5 + [55] * 5
+        closing_prices = [100] * 20 + [110] * 5 + [55] * 10
         opening_prices = closing_prices.copy()
         start_date = date(2026, 6, 1)
         dates = [
@@ -326,7 +326,8 @@ class TestBackTest(unittest.TestCase):
         result_without_split = run_backtest(
             closing_prices,
             opening_prices,
-            initial_cash=10000
+            initial_cash=10000,
+            dates=dates
         )
 
         trades_with_split_event = [
@@ -339,6 +340,7 @@ class TestBackTest(unittest.TestCase):
         ]
 
         self.assertEqual(trades_with_split_event, trades_without_split)
+        self.assertGreater(len(trades_with_split_event), 0)
 
 
 

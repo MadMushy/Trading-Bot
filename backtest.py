@@ -50,9 +50,10 @@ def run_backtest(
         
         #Adjust historical prices based on appliciable splits
         if dates is not None:
+            historical_dates = dates[:i + 1]
             adj_historical_prices = adjust_prices_for_splits(
                     historical_prices,
-                    dates,
+                    historical_dates,
                     adjusted_split_events
                 )
 
