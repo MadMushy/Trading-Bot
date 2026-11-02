@@ -24,10 +24,10 @@ def get_account_info():
     status= account.status
     portfolio_value = Decimal(account.portfolio_value)
 
-    print(
-            "ACCOUNT INFORMATION\n"
-            f"Status: {status}\n"
-            f"Cash:            ${cash:,.2f}\n"
-            f"Portfolio Value: ${portfolio_value:,.2f}"
+    return status, cash, portfolio_value
 
-    )
+def get_all_positions():
+
+    positions = trading_client.get_all_positions()
+
+    return positions

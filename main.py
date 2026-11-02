@@ -3,7 +3,7 @@ from strategy import calculate_sma, generate_signal
 from backtest import run_backtest
 from performance import calculate_return, calculate_max_drawdown, calculate_sharpe_ratio, calculate_daily_returns
 from benchmark import buy_and_hold
-from alpaca_client import get_account_info
+from alpaca_client import get_account_info, get_all_positions
 
 def main():
 
@@ -40,6 +40,22 @@ def main():
     sharpe_ratio_cross_over = calculate_sharpe_ratio(daily_return_cross_over)
     sharpe_ratio_buy_and_hold = calculate_sharpe_ratio(daily_return_buy_and_hold)
 
+    #Get account information
+    status, cash, portfolio_value = get_account_info()
+
+    #Get positions
+    positions = get_all_positions()
+
+    if positions == []:
+        print("No positions detected")
+    else:
+        for position in positions:
+            print(
+                    f"Ticker: {position.symbol} |"
+                    f"Quantity: {position.quantity} |"
+                    f"Market Value: ${position.market_value}\n"
+            )
+
     print("========== BACKTEST RESULTS ==========\n"
           f"Inital Capital:   ${initial_cash:,.2f}\n"
           f"Final Portfolio:  ${portfolio_value:,.2f}\n"
@@ -56,7 +72,13 @@ def main():
           f"======================================="
             
             )
-    get_account_info()
+    print(
+            "ACCOUNT INFORMATION\n"
+            f"Status: {status}\n"
+            f"Cash:            ${cash:,.2f}\n"
+            f"Portfolio Value: ${portfolio_value:,.2f}"
+
+    )
 
 
 if __name__ == "__main__":
