@@ -3,6 +3,7 @@ from strategy import calculate_sma, generate_signal
 from backtest import run_backtest
 from performance import calculate_return, calculate_max_drawdown, calculate_sharpe_ratio, calculate_daily_returns
 from benchmark import buy_and_hold
+from alpaca_client import get_account_info
 
 def main():
 
@@ -55,9 +56,7 @@ def main():
           f"======================================="
             
             )
-
-    print(f"Total Return: {total_return:.2f}%",
-          f"Trades Executed: {len(trades)}")
+    get_account_info()
 
 
 if __name__ == "__main__":
