@@ -49,3 +49,10 @@ def create_market_order(symbol, quantity):
                         )
 
     return market_order_data
+
+def submit_order(order_request):
+
+    market_order = trading_client.submit_order(
+                 order_data=order_request
+                )
+    return market_order
