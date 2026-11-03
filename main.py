@@ -41,18 +41,18 @@ def main():
     sharpe_ratio_buy_and_hold = calculate_sharpe_ratio(daily_return_buy_and_hold)
 
     #Get account information
-    status, cash, portfolio_value = get_account_info()
+    account_status, account_cash, account_portfolio_value = get_account_info()
 
     #Get positions
     positions = get_all_positions()
 
-    if positions == []:
+    if not positions:
         print("No positions detected")
     else:
         for position in positions:
             print(
                     f"Ticker: {position.symbol} |"
-                    f"Quantity: {position.quantity} |"
+                    f"Quantity: {position.qty} |"
                     f"Market Value: ${position.market_value}\n"
             )
 
@@ -74,9 +74,9 @@ def main():
             )
     print(
             "ACCOUNT INFORMATION\n"
-            f"Status: {status}\n"
-            f"Cash:            ${cash:,.2f}\n"
-            f"Portfolio Value: ${portfolio_value:,.2f}"
+            f"Status: {account_status}\n"
+            f"Cash:            ${account_cash:,.2f}\n"
+            f"Portfolio Value: ${account_portfolio_value:,.2f}"
 
     )
 
