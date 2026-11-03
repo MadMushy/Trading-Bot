@@ -35,7 +35,7 @@ def get_all_positions():
 
 def create_market_order(symbol, quantity):
     
-    if quantity < 0:
+    if quantity <= 0:
         raise ValueError("Quantity cannot be negative")
     if not isinstance(symbol, str):
         raise TypeError("Symbol needs to be a string")
