@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from alpaca_client import get_all_positions, create_market_order, submit_order
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id 
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -62,3 +62,33 @@ class TestAlpacaClient(unittest.TestCase):
             self.assertEqual(fake_position.id, order.id)
             self.assertEqual(order.id, "test-order-123")
             mock_positions.assert_called_once_with(order_data=order_request)
+
+    def test_is_valid_uuid(self):
+
+        order_id_valid = "550e8400-e29b-41d4-a716-446655440000"
+        order_id_not_valid = "27855430"
+
+        result_valid = is_valid_uuid(order_id_valid)
+        result_not_valid = is_valid_uuid(order_id_not_valid)
+
+        self.assertTrue(result_valid)
+        self.assertFalse(result_not_valid)
+
+    def test_get_order_by_id(self):
+
+        order_id = "550e8400-e29b-41d4-a716-446655440000"
+
+        fake_order = MagicMock()
+        fake_order.id = order_id
+        fake_order.status = "filled"
+
+        with patch("alpaca_client.trading_client.get_order_by_id") as mock_get_order:
+            mock_get_order.return_value = fake_order
+
+            result = get_order_by_id(order_id)
+            self.assertEqual(result.id, order_id)
+            self.assertEqual(result.status, "filled")
+            mock_get_order.assert_called_once_with(order_id)
+
+            with self.assertRaises(ValueError):
+                get_order_by_id("not-a-valid-uuid")

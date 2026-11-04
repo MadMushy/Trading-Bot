@@ -61,7 +61,7 @@ def submit_order(order_request):
 def is_valid_uuid(uuid_string):
     try:
         uuid_obj = uuid.UUID(uuid_string)
-        return str(uuid.odj) == uuid_string.lower()
+        return str(uuid_obj) == uuid_string.lower()
     except ValueError:
         return False
 
