@@ -47,16 +47,18 @@ class TestAlpacaClient(unittest.TestCase):
 
     def test_client_submit_order(self):
 
+        order_request = create_market_order("SPY", 5)
+
         fake_position = MagicMock()
 
-        fake_position.symbol = "SPY"
-        fake_position.qty = "10"
+        fake_position.id = "test-order-123"
+        fake_position.status = "accepted"
 
         with patch("alpaca_client.trading_client.submit_order") as mock_positions:
             mock_positions.return_value = fake_position
 
-            order = submit_order(fake_position)
+            order = submit_order(order_request)
 
             self.assertEqual(fake_position.id, order.id)
-
-
+            self.assertEqual(order.id, "test-order-123")
+            mock_positions.assert_called_once_with(order_data=order_request)

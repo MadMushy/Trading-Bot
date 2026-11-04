@@ -1,4 +1,5 @@
 import os
+import uuid
 from decimal import Decimal
 from dotenv import load_dotenv
 from alpaca.trading.client import TradingClient
@@ -56,3 +57,19 @@ def submit_order(order_request):
                  order_data=order_request
                 )
     return market_order
+
+def is_valid_uuid(uuid_string):
+    try:
+        uuid_obj = uuid.UUID(uuid_string)
+        return str(uuid.odj) == uuid_string.lower()
+    except ValueError:
+        return False
+
+def get_order_by_id(order_id):
+
+    if is_valid_uuid(order_id):
+        #Verifies valid order id and then looks
+        num = trading_client.get_order_by_id(order_id)
+        return num
+    else:
+        raise ValueError("Not a valid order ID")
