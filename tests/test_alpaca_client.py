@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from alpaca_client import get_all_positions, create_market_order
+from alpaca_client import get_all_positions, create_market_order, submit_order
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -44,3 +44,19 @@ class TestAlpacaClient(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             create_market_order("SPY", 0)
+
+    def test_client_submit_order(self):
+
+        fake_position = MagicMock()
+
+        fake_position.symbol = "SPY"
+        fake_position.qty = "10"
+
+        with patch("alpaca_client.trading_client.submit_order") as mock_positions:
+            mock_positions.return_value = fake_position
+
+            order = submit_order(fake_position)
+
+            self.assertEqual(fake_position.id, order.id)
+
+
