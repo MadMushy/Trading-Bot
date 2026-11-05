@@ -41,12 +41,16 @@ def create_market_order(symbol, quantity):
     if not isinstance(symbol, str):
         raise TypeError("Symbol needs to be a string")
 
+    #Create a uniqe ID seperate from the Alpaca ID
+    order_id = str(uuid.uuid4())
+
     #Create an order
     market_order_data = MarketOrderRequest(
                         symbol=symbol,
                         qty=quantity,
                         side=OrderSide.BUY,
-                        time_in_force=TimeInForce.DAY
+                        time_in_force=TimeInForce.DAY,
+                        client_order_id=order_id
                         )
 
     return market_order_data
