@@ -77,3 +77,12 @@ def get_order_by_id(order_id):
         return num
     else:
         raise ValueError("Not a valid order ID")
+
+def get_order_by_client_id(client_order_id):
+
+    if is_valid_uuid(client_order_id):
+        #Verifies valid uuid
+        num = trading_client.get_order_by_client_id(client_order_id)
+        return num
+    else:
+        raise ValueError("Not a valid client ID")
