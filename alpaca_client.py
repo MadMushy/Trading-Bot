@@ -34,15 +34,18 @@ def get_all_positions():
 
     return positions
 
-def create_market_order(symbol, quantity):
+def create_market_order(symbol, quantity, client_order_id=None):
     
     if quantity <= 0:
         raise ValueError("Quantity cannot be negative")
     if not isinstance(symbol, str):
         raise TypeError("Symbol needs to be a string")
 
-    #Create a uniqe ID seperate from the Alpaca ID
-    order_id = str(uuid.uuid4())
+    #Create a uniqe ID seperate from the Alpaca ID if there is no client order id
+    if client_order_id is None:
+        order_id = str(uuid.uuid4())
+    else:
+        order_id = client_order_id
 
     #Create an order
     market_order_data = MarketOrderRequest(

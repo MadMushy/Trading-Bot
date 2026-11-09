@@ -43,6 +43,18 @@ class TestAlpacaClient(unittest.TestCase):
         self.assertEqual(order.time_in_force, "day")
         self.assertTrue(valid_id)
 
+    def test_create_market_order_with_client_id(self):
+
+        order = create_market_order("SPY", 5, client_order_id="test-order-001")
+        valid_id = is_valid_uuid(order.client_order_id)
+        
+        self.assertEqual(order.symbol, "SPY")
+        self.assertEqual(order.qty, 5)
+        self.assertEqual(order.side, "buy")
+        self.assertEqual(order.time_in_force, "day")
+        self.assertEqual(order.client_order_id, "test-order-001") 
+        self.assertFalse(valid_id)
+
     def test_creat_markey_order_valueerror(self):
 
         with self.assertRaises(ValueError):
