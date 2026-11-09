@@ -1,7 +1,8 @@
 import unittest
 from alpaca.common.exceptions import APIError
+from alpaca.trading.enums import OrderStatus
 from unittest.mock import patch, MagicMock
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -148,6 +149,22 @@ class TestAlpacaClient(unittest.TestCase):
             self.assertEqual(result.status, "pending")
             self.assertEqual(result.id, "alpaca-order-123")
             mock_get_order.assert_called_once_with(client_id)
+
+    def test_order_filled(self):
+        fake_order = MagicMock()
+        fake_order.status = OrderStatus.FILLED
+
+        result = is_order_filled(fake_order)
+
+        self.assertTrue(result)
+
+    def test_order_not_filled(self):
+        fake_order = MagicMock()
+        fake_order.status = OrderStatus.PARTIALLY_FILLED
+
+        result = is_order_filled(fake_order)
+
+        self.assertFalse(result)
 
 
 
