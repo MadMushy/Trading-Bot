@@ -2,7 +2,8 @@ import unittest
 from alpaca.common.exceptions import APIError
 from alpaca.trading.enums import OrderStatus
 from unittest.mock import patch, MagicMock
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled
+from decimal import Decimal
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -166,5 +167,62 @@ class TestAlpacaClient(unittest.TestCase):
 
         self.assertFalse(result)
 
+    def test_get_remaining_quantity(self):
 
+        fake_order = MagicMock()
+
+        fake_order.qty = "10"
+        fake_order.filled_qty = "5"
+
+        remaining_qty = get_remaining_quantity(fake_order)
+
+        self.assertEqual(remaining_qty, Decimal("5"))
+        self.assertIsInstance(remaining_qty, Decimal)
+
+    def test_get_remaining_quantity_value_error(self):
+
+        fake_order = MagicMock()
+
+        fake_order.qty = "10"
+        fake_order.filled_qty = "11"
+
+        with self.assertRaises(ValueError):
+            get_remaining_quantity(fake_order)
+
+    def test_get_active_remaining_quantity_PARTIALLY_FILLED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.status = OrderStatus.PARTIALLY_FILLED
+        fake_order.qty = "10"
+        fake_order.filled_qty = "4"
+
+        remaining_qty = get_active_remaining_quantity(fake_order)
+
+        self.assertEqual(remaining_qty, Decimal("6"))
+        self.assertIsInstance(remaining_qty, Decimal)
+
+    def test_get_active_remaining_quantity_CANCELED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.status = OrderStatus.CANCELED
+        fake_order.qty = "10"
+        fake_order.filled_qty = "4"
+
+        remaining_qty = get_active_remaining_quantity(fake_order)
+
+        self.assertEqual(remaining_qty, Decimal("0"))
+        self.assertIsInstance(remaining_qty, Decimal)
+
+    def test_get_active_remaining_quantity_VALUEERROR(self):
+
+        fake_order = MagicMock()
+
+        fake_order.status = None
+        fake_order.qty = "10"
+        fake_order.filled_qty = "4"
+
+        with self.assertRaises(ValueError):
+            get_active_remaining_quantity(fake_order)
 

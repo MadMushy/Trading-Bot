@@ -106,12 +106,22 @@ def get_remaining_quantity(order):
     if order is None:
         raise ValueError("order cannot be None")
 
-    order = Decimal(order.qty)
-    filled = Decimal(order.filled_qty)
+    order_qty = Decimal(order.qty)
+    filled_qty = Decimal(order.filled_qty)
 
-    if filled > order:
+    if filled_qty > order_qty:
         raise ValueError("filled cannot be greater then order.")
 
-    remaining_qty = order - filled
+    remaining_qty = order_qty - filled_qty
     
     return remaining_qty
+
+def get_active_remaining_quantity(order):
+
+    if order.status in (OrderStatus.NEW, OrderStatus.PARTIALLY_FILLED):
+        return get_remaining_quantity(order)
+    elif order.status in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.REJECTED, OrderStatus.EXPIRED):
+        return Decimal("0")
+    else:
+        raise ValueError("Unexpected status input")
+
