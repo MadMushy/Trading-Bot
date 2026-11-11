@@ -139,3 +139,8 @@ def summarize_order(order):
 
     return summary
 
+def calculate_position_difference(target_qty, current_qty):
+
+    difference = Decimal(target_qty) - Decimal(current_qty)
+
+    return Decimal(difference)
