@@ -3,7 +3,7 @@ from alpaca.common.exceptions import APIError
 from alpaca.trading.enums import OrderStatus
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -251,4 +251,45 @@ class TestAlpacaClient(unittest.TestCase):
 
         self.assertEqual(remaining_qty, Decimal("10"))
         self.assertIsInstance(remaining_qty, Decimal)
+
+    def test_summarize_order_PARTIALLY_FILLED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.status = OrderStatus.PARTIALLY_FILLED
+        fake_order.qty = "10"
+        fake_order.filled_qty = "4"
+        fake_order.id = "alpaca-order-123"
+        fake_order.client_order_id = "my-order-001"
+
+        summary = summarize_order(fake_order)
+
+        self.assertEqual(summary["order_id"], "alpaca-order-123")
+        self.assertEqual(summary["client_order_id"], "my-order-001")
+        self.assertEqual(summary["status"], OrderStatus.PARTIALLY_FILLED)
+        self.assertEqual(summary["ordered_qty"], Decimal("10"))
+        self.assertEqual(summary["filled_qty"], Decimal("4"))
+        self.assertEqual(summary["remaining_qty"], Decimal("6"))
+        self.assertEqual(summary["active_remaining_qty"], Decimal("6"))
+
+    def test_summarize_order_CANCELED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.status = OrderStatus.CANCELED
+        fake_order.qty = "10"
+        fake_order.filled_qty = "4"
+        fake_order.id = "alpaca-order-123"
+        fake_order.client_order_id = "my-order-001"
+
+        summary = summarize_order(fake_order)
+
+        self.assertEqual(summary["order_id"], "alpaca-order-123")
+        self.assertEqual(summary["client_order_id"], "my-order-001")
+        self.assertEqual(summary["status"], OrderStatus.CANCELED)
+        self.assertEqual(summary["ordered_qty"], Decimal("10"))
+        self.assertEqual(summary["filled_qty"], Decimal("4"))
+        self.assertEqual(summary["remaining_qty"], Decimal("6"))
+        self.assertEqual(summary["active_remaining_qty"], Decimal("0"))
+
 
