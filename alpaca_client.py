@@ -118,10 +118,24 @@ def get_remaining_quantity(order):
 
 def get_active_remaining_quantity(order):
 
-    if order.status in (OrderStatus.NEW, OrderStatus.PARTIALLY_FILLED):
+    if order.status in (OrderStatus.NEW, OrderStatus.PARTIALLY_FILLED, OrderStatus.ACCEPTED, OrderStatus.PENDING_NEW, OrderStatus.PENDING_CANCEL, OrderStatus.PENDING_REPLACE):
         return get_remaining_quantity(order)
     elif order.status in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.REJECTED, OrderStatus.EXPIRED):
         return Decimal("0")
     else:
         raise ValueError("Unexpected status input")
+
+def summarize_order(order):
+
+    summary = {
+            "order_id" : order.id,
+            "client_order_id" : order.client_order_id,
+            "status" : order.status,
+            "ordered_qty" : Decimal(order.qty),
+            "filled_qty" : Decimal(order.filled_qty),
+            "remaining_qty" : get_remaining_quantity(order),
+            "active_remaining_qty" : get_active_remaining_quantity(order)
+    }
+
+    return summary
 

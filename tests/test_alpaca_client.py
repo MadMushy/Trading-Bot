@@ -226,3 +226,29 @@ class TestAlpacaClient(unittest.TestCase):
         with self.assertRaises(ValueError):
             get_active_remaining_quantity(fake_order)
 
+    def test_get_active_remaining_quantity_PENDING_CANCEL(self):
+
+        fake_order = MagicMock()
+
+        fake_order.status = OrderStatus.PENDING_CANCEL
+        fake_order.qty = "10"
+        fake_order.filled_qty = "4"
+
+        remaining_qty = get_active_remaining_quantity(fake_order)
+
+        self.assertEqual(remaining_qty, Decimal("6"))
+        self.assertIsInstance(remaining_qty, Decimal)
+
+    def test_get_active_remaining_quantity_ACCEPTED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.status = OrderStatus.ACCEPTED
+        fake_order.qty = "10"
+        fake_order.filled_qty = "0"
+
+        remaining_qty = get_active_remaining_quantity(fake_order)
+
+        self.assertEqual(remaining_qty, Decimal("10"))
+        self.assertIsInstance(remaining_qty, Decimal)
+
