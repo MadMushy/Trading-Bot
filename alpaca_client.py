@@ -1,5 +1,6 @@
 import os
 import uuid
+import math
 from decimal import Decimal
 from dotenv import load_dotenv
 from alpaca.trading.client import TradingClient
@@ -139,8 +140,28 @@ def summarize_order(order):
 
     return summary
 
-def calculate_position_difference(target_qty, current_qty):
+def calculate_position_difference(
+    target_qty, current_qty, pending_buy_qty=0, pending_sell_qty=0
+):
+    #Provides a touple to iterate through and converts values using Decimal
+    quantities = (
+        Decimal(target_qty),
+        Decimal(current_qty),
+        Decimal(pending_buy_qty),
+        Decimal(pending_sell_qty)
+    )
+    
+    #Loop through parameters
+    for item in quantities:
+        if not item.is_finite():
+            #Check finite values before negative
+            raise ValueError(f"{item} is not finite")
+        if item < 0:
+            raise ValueError(f"{item} cannot be negative")
+    
+    #Unpack the touple
+    target, current, pending_buy, pending_sell = quantities
 
-    difference = Decimal(target_qty) - Decimal(current_qty)
+    difference = target - current - pending_buy + pending_sell
 
-    return Decimal(difference)
+    return difference

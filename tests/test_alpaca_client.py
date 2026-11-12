@@ -3,7 +3,7 @@ from alpaca.common.exceptions import APIError
 from alpaca.trading.enums import OrderStatus
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -291,5 +291,23 @@ class TestAlpacaClient(unittest.TestCase):
         self.assertEqual(summary["filled_qty"], Decimal("4"))
         self.assertEqual(summary["remaining_qty"], Decimal("6"))
         self.assertEqual(summary["active_remaining_qty"], Decimal("0"))
+
+    def test_position_difference_positive(self):
+    
+        result = calculate_position_difference("10", "4", "3", "0")
+    
+        self.assertEqual(result, Decimal("3"))
+
+    def test_position_difference_negative(self):
+        
+        result = calculate_position_difference("4", "10", "0", "3")
+    
+        self.assertEqual(result, Decimal("-3"))
+
+    def test_position_difference_zero(self):
+        
+        result = calculate_position_difference("10", "4", "6", "0")
+    
+        self.assertEqual(result, Decimal("0"))
 
 
