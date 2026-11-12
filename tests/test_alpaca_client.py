@@ -310,4 +310,52 @@ class TestAlpacaClient(unittest.TestCase):
     
         self.assertEqual(result, Decimal("0"))
 
+    def test_position_difference_input_validation_target(self):
 
+        with self.assertRaises(ValueError):
+            calculate_position_difference("-1", "4", "6", "0")
+
+    def test_position_difference_input_validation_current(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("10", "-1", "6", "0")
+
+    def test_position_difference_input_validation_pending_buy(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("10", "4", "-1", "0")
+
+    def test_position_difference_input_validation_pending_sell(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("10", "4", "6", "-1")
+
+    def test_position_difference_input_validation_target_non_finite(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("NaN", "4", "6", "0")
+
+    def test_position_difference_input_validation_current_non_finite(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("10", "Infinity", "6", "0")
+
+    def test_position_difference_input_validation_target_abc(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("abc", "4", "6", "0")
+
+    def test_position_difference_input_validation_current_None(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("10", "None", "6", "0")
+
+    def test_position_difference_input_validation_blank(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("10", "4", "", "0")
+
+    def test_position_difference_input_validation_list(self):
+
+        with self.assertRaises(ValueError):
+            calculate_position_difference("10", "4", "6", [])

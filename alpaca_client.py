@@ -1,7 +1,6 @@
 import os
 import uuid
-import math
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from dotenv import load_dotenv
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import MarketOrderRequest
@@ -143,13 +142,16 @@ def summarize_order(order):
 def calculate_position_difference(
     target_qty, current_qty, pending_buy_qty=0, pending_sell_qty=0
 ):
-    #Provides a touple to iterate through and converts values using Decimal
-    quantities = (
-        Decimal(target_qty),
-        Decimal(current_qty),
-        Decimal(pending_buy_qty),
-        Decimal(pending_sell_qty)
-    )
+    #Provides a touple to iterate through and converts values using Decimal and validates
+    try:
+        quantities = (
+            Decimal(target_qty),
+            Decimal(current_qty),
+            Decimal(pending_buy_qty),
+            Decimal(pending_sell_qty)
+        )
+    except (InvalidOperation, TypeError) as error:
+        raise ValueError("Invalid quantity") from error
     
     #Loop through parameters
     for item in quantities:
