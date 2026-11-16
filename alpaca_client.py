@@ -4,7 +4,7 @@ from decimal import Decimal, InvalidOperation
 from dotenv import load_dotenv
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import MarketOrderRequest
-from alpaca.trading.enums import OrderSide, TimeInForce, OrderStatus
+from alpaca.trading.enums import OrderSide, TimeInForce, OrderStatus, OrderSide
 
 #load the credentials
 load_dotenv()
@@ -167,3 +167,21 @@ def calculate_position_difference(
     difference = target - current - pending_buy + pending_sell
 
     return difference
+
+def calculate_pending_order_quantities(orders, symbol):
+    pending_buy = Decimal("0")
+    pending_sell = Decimal("0")
+
+    for order in orders:
+        if order.symbol != symbol:
+            continue
+        remaining_qty = get_active_remaining_quantity(order)
+        if order.side == OrderSide.BUY:
+            pending_buy += remaining_qty
+        elif order.side == OrderSide.SELL:
+            pending_sell += remaining_qty
+        else:
+            raise ValueError("un-expected side")
+
+    return pending_buy, pending_sell
+
