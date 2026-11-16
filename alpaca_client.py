@@ -185,3 +185,17 @@ def calculate_pending_order_quantities(orders, symbol):
 
     return pending_buy, pending_sell
 
+def reconcile_position(target_qty, current_qty, orders, symbol):
+
+    #Calculate pending buy and sell
+    pending_buy, pending_sell = calculate_pending_order_quantities(orders, symbol)
+
+    #Calculate difference
+    difference = calculate_position_difference(
+                trget_qty,
+                current_qty,
+                pending_buy,
+                pending_sell
+    )
+
+    return difference
