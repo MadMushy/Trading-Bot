@@ -1,9 +1,9 @@
 import unittest
 from alpaca.common.exceptions import APIError
-from alpaca.trading.enums import OrderStatus
+from alpaca.trading.enums import OrderStatus, OrderSide
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -38,7 +38,7 @@ class TestAlpacaClient(unittest.TestCase):
 
         order = create_market_order("SPY", 5)
         valid_id = is_valid_uuid(order.client_order_id)
-        
+
         self.assertEqual(order.symbol, "SPY")
         self.assertEqual(order.qty, 5)
         self.assertEqual(order.side, "buy")
@@ -49,7 +49,7 @@ class TestAlpacaClient(unittest.TestCase):
 
         order = create_market_order("SPY", 5, client_order_id="test-order-001")
         valid_id = is_valid_uuid(order.client_order_id)
-        
+
         self.assertEqual(order.symbol, "SPY")
         self.assertEqual(order.qty, 5)
         self.assertEqual(order.side, "buy")
@@ -101,6 +101,7 @@ class TestAlpacaClient(unittest.TestCase):
 
         with patch("alpaca_client.trading_client.get_order_by_id") as mock_get_order:
             mock_get_order.return_value = fake_order
+
 
             result = get_order_by_id(order_id)
             self.assertEqual(result.id, order_id)
@@ -359,3 +360,131 @@ class TestAlpacaClient(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             calculate_position_difference("10", "4", "6", [])
+
+    def test_calculate_difference_order_quantities_BUY(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "5"
+        fake_order.filled_qty = "0"
+
+        result = calculate_pending_order_quantities([fake_order], "SPY")
+
+        self.assertEqual(result, (Decimal("5"), Decimal("0")))
+
+    def test_calculate_difference_order_quantities_EMPTY(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "QQQ"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "5"
+        fake_order.filled_qty = "0"
+
+        result = calculate_pending_order_quantities([fake_order], "SPY")
+
+        self.assertEqual(result, (Decimal("0"), Decimal("0")))
+
+    def test_calculate_difference_order_quantities_SELL(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.SELL
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+
+        result = calculate_pending_order_quantities([fake_order], "SPY")
+
+        self.assertEqual(result, (Decimal("0"), Decimal("3")))
+
+    def test_calculate_difference_order_quantities_PARTIALLY_FILLED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.PARTIALLY_FILLED
+        fake_order.qty = "5"
+        fake_order.filled_qty = "2"
+
+        result = calculate_pending_order_quantities([fake_order], "SPY")
+
+        self.assertEqual(result, (Decimal("3"), Decimal("0")))
+
+    def test_calculate_difference_order_quantities_CANCELED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.CANCELED
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+
+        result = calculate_pending_order_quantities([fake_order], "SPY")
+
+        self.assertEqual(result, (Decimal("0"), Decimal("0")))
+    def test_calculate_difference_order_quantities_ACTIVE_BUY_and_SELL(self):
+
+        fake_order_1 = MagicMock()
+        fake_order_2 = MagicMock()
+
+        fake_order_1.symbol = "SPY"
+        fake_order_1.side = OrderSide.BUY
+        fake_order_1.status = OrderStatus.NEW
+        fake_order_1.qty = "4"
+        fake_order_1.filled_qty = "0"
+
+        fake_order_2.symbol = "SPY"
+        fake_order_2.side = OrderSide.SELL
+        fake_order_2.status = OrderStatus.NEW
+        fake_order_2.qty = "2"
+        fake_order_2.filled_qty = "0"
+
+        fake_orders = [fake_order_1, fake_order_2]
+
+        result = calculate_pending_order_quantities(fake_orders, "SPY")
+
+        self.assertEqual(result, (Decimal("4"), Decimal("2")))
+
+    def test_calculate_difference_order_quantities_ACTIVE_BUY_2_orders(self):
+
+        fake_order_1 = MagicMock()
+        fake_order_2 = MagicMock()
+
+        fake_order_1.symbol = "SPY"
+        fake_order_1.side = OrderSide.BUY
+        fake_order_1.status = OrderStatus.NEW
+        fake_order_1.qty = "3"
+        fake_order_1.filled_qty = "0"
+
+        fake_order_2.symbol = "SPY"
+        fake_order_2.side = OrderSide.BUY
+        fake_order_2.status = OrderStatus.NEW
+        fake_order_2.qty = "5"
+        fake_order_2.filled_qty = "0"
+
+        fake_orders = [fake_order_1, fake_order_2]
+
+        result = calculate_pending_order_quantities(fake_orders, "SPY")
+
+        self.assertEqual(result, (Decimal("8"), Decimal("0")))
+
+    def test_calculate_difference_order_quantities_VALUERROR(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = "INVALID"
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "5"
+        fake_order.filled_qty = "2"
+
+        with self.assertRaises(ValueError):
+            calculate_pending_order_quantities([fake_order], "SPY")
