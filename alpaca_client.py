@@ -192,7 +192,7 @@ def reconcile_position(target_qty, current_qty, orders, symbol):
 
     #Calculate difference
     difference = calculate_position_difference(
-                trget_qty,
+                target_qty,
                 current_qty,
                 pending_buy,
                 pending_sell

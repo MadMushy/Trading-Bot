@@ -3,7 +3,7 @@ from alpaca.common.exceptions import APIError
 from alpaca.trading.enums import OrderStatus, OrderSide
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -488,3 +488,115 @@ class TestAlpacaClient(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             calculate_pending_order_quantities([fake_order], "SPY")
+
+    def test_reconcile_position(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.CANCELED
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+        target_qty = "10"
+        current_qty = "4"
+        
+        result = reconcile_position(target_qty, current_qty, [fake_order], "SPY")
+
+        self.assertEqual(result, Decimal("6"))
+
+    def test_reconcile_position_active_BUY(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+        target_qty = "10"
+        current_qty = "4"
+        
+        result = reconcile_position(target_qty, current_qty, [fake_order], "SPY")
+
+        self.assertEqual(result, Decimal("3"))
+
+    def test_reconcile_position_active_SELL(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.SELL
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+        target_qty = "4"
+        current_qty = "10"
+        
+        result = reconcile_position(target_qty, current_qty, [fake_order], "SPY")
+
+        self.assertEqual(result, Decimal("-3"))
+
+    def test_reconcile_position_fully_covered(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "6"
+        fake_order.filled_qty = "0"
+        target_qty = "10"
+        current_qty = "4"
+        
+        result = reconcile_position(target_qty, current_qty, [fake_order], "SPY")
+
+        self.assertEqual(result, Decimal("0"))
+
+    def test_reconcile_position_no_orders(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.FILLED
+        fake_order.qty = "3"
+        fake_order.filled_qty = "3"
+        target_qty = "10"
+        current_qty = "4"
+        
+        result = reconcile_position(target_qty, current_qty, [fake_order], "SPY")
+
+        self.assertEqual(result, Decimal("6"))
+
+    def test_reconcile_position_different_symbol(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "QQQ"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+        target_qty = "10"
+        current_qty = "4"
+        
+        result = reconcile_position(target_qty, current_qty, [fake_order], "SPY")
+
+        self.assertEqual(result, Decimal("6"))
+
+    def test_reconcile_position_excess_pending_buy(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "2"
+        fake_order.filled_qty = "0"
+        target_qty = "10"
+        current_qty = "10"
+        
+        result = reconcile_position(target_qty, current_qty, [fake_order], "SPY")
+
+        self.assertEqual(result, Decimal("-2"))
