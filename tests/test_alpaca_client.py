@@ -3,7 +3,7 @@ from alpaca.common.exceptions import APIError
 from alpaca.trading.enums import OrderStatus, OrderSide
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -600,3 +600,131 @@ class TestAlpacaClient(unittest.TestCase):
         result = reconcile_position(target_qty, current_qty, [fake_order], "SPY")
 
         self.assertEqual(result, Decimal("-2"))
+
+    def test_determine_order_action_BUY_no_exsisting(self):
+
+        result = determine_order_action(
+            target_qty="10",
+            current_qty="4",
+            orders=[],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, ("BUY", Decimal("6")))
+
+    def test_determine_order_action_SELL_no_exsisting(self):
+
+        result = determine_order_action(
+            target_qty="4",
+            current_qty="10",
+            orders=[],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, ("SELL", Decimal("6")))
+
+    def test_determine_order_action_HOLD_no_exsisting(self):
+
+        result = determine_order_action(
+            target_qty="10",
+            current_qty="10",
+            orders=[],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, ("HOLD", Decimal("0")))
+
+    def test_determine_order_action_WAIT_BUY_3_NEW(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+
+        result = determine_order_action(
+            target_qty="10",
+            current_qty="4",
+            orders=[fake_order],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, ("WAIT", Decimal("0")))
+
+    def test_determine_order_action_WAIT_SELL_3_NEW(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.SELL
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+
+        result = determine_order_action(
+            target_qty="4",
+            current_qty="10",
+            orders=[fake_order],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, ("WAIT", Decimal("0")))
+
+    def test_determine_order_action_BUY_BUY_3_CANCELED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.CANCELED
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+
+        result = determine_order_action(
+            target_qty="10",
+            current_qty="4",
+            orders=[fake_order],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, ("BUY", Decimal("6")))
+
+    def test_determine_order_action_BUY_BUY_3_NEW_QQQ(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "QQQ"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+
+        result = determine_order_action(
+            target_qty="10",
+            current_qty="4",
+            orders=[fake_order],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, ("BUY", Decimal("6")))
+
+    def test_determine_order_action_WAIT_BUY_2_NEW(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "2"
+        fake_order.filled_qty = "0"
+
+        result = determine_order_action(
+            target_qty="10",
+            current_qty="10",
+            orders=[fake_order],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, ("WAIT", Decimal("0")))
