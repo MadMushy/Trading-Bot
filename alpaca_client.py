@@ -199,3 +199,20 @@ def reconcile_position(target_qty, current_qty, orders, symbol):
     )
 
     return difference
+
+def determine_order_action(target_qty, current_qty, orders, symbol):
+    
+    #Determine any pending sales or buys
+    pending_buy, pending_sell = calculate_pending_order_quantities(orders, symbol)
+    
+    #Dont make any orders till all orders have gone through
+    if pending_buy > 0 or pending_sell > 0:
+        return ("WAIT", Decimal("0"))
+
+    difference = reconcile_position(target_qty, current_qty, orders, symbol)
+    if difference > 0:
+        return ("BUY", difference)
+    elif difference < 0:
+        return ("SELL", difference.copy_abs())
+    else:
+        return ("HOLD", Decimal("0"))
