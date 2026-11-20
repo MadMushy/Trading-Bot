@@ -216,3 +216,24 @@ def determine_order_action(target_qty, current_qty, orders, symbol):
         return ("SELL", difference.copy_abs())
     else:
         return ("HOLD", Decimal("0"))
+
+def has_unresolved_orders(orders, symbol):
+
+    #Place statuses in set
+    terminal_statuses = {
+        OrderStatus.NEW, 
+        OrderStatus.ACCEPTED, 
+        OrderStatus.PENDING_NEW, 
+        OrderStatus.PARTIALLY_FILLED, 
+        OrderStatus.PENDING_CANCEL, 
+        OrderStatus.PENDING_REPLACE
+    }
+    
+    #Loop through orders
+    for order in orders:
+        if order.symbol != symbol:
+            continue
+        if order.status in terminal_statuses:
+            return True
+        return False
+    return False
