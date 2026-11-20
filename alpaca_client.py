@@ -202,8 +202,12 @@ def reconcile_position(target_qty, current_qty, orders, symbol):
 
 def determine_order_action(target_qty, current_qty, orders, symbol):
     
+    #Check unresolved orders
+    if has_unresolved_orders(orders, symbol):
+        return ("WAIT", Decimal("0"))
+
     #Determine any pending sales or buys
-    pending_buy, pending_sell = calculate_pending_order_quantities(orders, symbol)
+    pending_buy, pending_sell = calculate_pending_order_quantities(orders, symbol) 
     
     #Dont make any orders till all orders have gone through
     if pending_buy > 0 or pending_sell > 0:
@@ -221,19 +225,16 @@ def has_unresolved_orders(orders, symbol):
 
     #Place statuses in set
     terminal_statuses = {
-        OrderStatus.NEW, 
-        OrderStatus.ACCEPTED, 
-        OrderStatus.PENDING_NEW, 
-        OrderStatus.PARTIALLY_FILLED, 
-        OrderStatus.PENDING_CANCEL, 
-        OrderStatus.PENDING_REPLACE
+        OrderStatus.FILLED, 
+        OrderStatus.CANCELED, 
+        OrderStatus.REJECTED, 
+        OrderStatus.EXPIRED
     }
-    
+
     #Loop through orders
     for order in orders:
         if order.symbol != symbol:
             continue
-        if order.status in terminal_statuses:
+        if order.status not in terminal_statuses:
             return True
-        return False
     return False

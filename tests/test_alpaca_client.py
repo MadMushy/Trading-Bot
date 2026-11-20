@@ -3,7 +3,7 @@ from alpaca.common.exceptions import APIError
 from alpaca.trading.enums import OrderStatus, OrderSide
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action, has_unresolved_orders
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -728,3 +728,102 @@ class TestAlpacaClient(unittest.TestCase):
         )
 
         self.assertEqual(result, ("WAIT", Decimal("0")))
+
+    def test_has_unresolved_issues_empty_list(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.status = OrderStatus.NEW
+
+        result = has_unresolved_orders(
+            orders=[],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, False)
+
+    def test_has_unresolved_issues_SPY_FILLED(self):
+
+        fake_order = MagicMock()
+
+        fake_order.symbol = "SPY"
+        fake_order.status = OrderStatus.FILLED
+
+        result = has_unresolved_orders(
+            orders=[fake_order],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, False)
+
+    def test_has_unresolved_issues_SPY_FILLED_NEW(self):
+
+        fake_order_1 = MagicMock()
+        fake_order_2 = MagicMock()
+
+        fake_orders = [fake_order_1, fake_order_2]
+
+        fake_order_1.symbol = "SPY"
+        fake_order_1.status = OrderStatus.FILLED
+        fake_order_2.symbol = "SPY"
+        fake_order_2.status = OrderStatus.NEW
+
+        result = has_unresolved_orders(
+            orders=fake_orders,
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, True)
+
+    def test_has_unresolved_issues_SPY_NEW_FILLED(self):
+
+        fake_order_1 = MagicMock()
+        fake_order_2 = MagicMock()
+
+        fake_orders = [fake_order_1, fake_order_2]
+
+        fake_order_1.symbol = "SPY"
+        fake_order_1.status = OrderStatus.NEW
+        fake_order_2.symbol = "SPY"
+        fake_order_2.status = OrderStatus.FILLED
+
+        result = has_unresolved_orders(
+            orders=fake_orders,
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, True)
+
+    def test_has_unresolved_issues_QQQ_NEW_SPY_CANCELED(self):
+
+        fake_order_1 = MagicMock()
+        fake_order_2 = MagicMock()
+
+        fake_orders = [fake_order_1, fake_order_2]
+
+        fake_order_1.symbol = "QQQ"
+        fake_order_1.status = OrderStatus.NEW
+        fake_order_2.symbol = "SPY"
+        fake_order_2.status = OrderStatus.CANCELED
+
+        result = has_unresolved_orders(
+            orders=fake_orders,
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, False)
+
+    def test_has_unresolved_issues_UNKNOWN(self):
+
+        fake_order_1 = MagicMock()
+
+        fake_order_1.symbol = "SPY"
+        fake_order_1.status = "unknown"
+
+        result = has_unresolved_orders(
+            orders=[fake_order_1],
+            symbol="SPY"
+        )
+
+        self.assertEqual(result, True)
