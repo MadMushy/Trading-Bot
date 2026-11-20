@@ -3,8 +3,8 @@ import uuid
 from decimal import Decimal, InvalidOperation
 from dotenv import load_dotenv
 from alpaca.trading.client import TradingClient
-from alpaca.trading.requests import MarketOrderRequest
-from alpaca.trading.enums import OrderSide, TimeInForce, OrderStatus, OrderSide
+from alpaca.trading.requests import MarketOrderRequest, GetOrdersRequest
+from alpaca.trading.enums import OrderSide, TimeInForce, OrderStatus, OrderSide, QueryOrderStatus
 
 #load the credentials
 load_dotenv()
@@ -238,3 +238,17 @@ def has_unresolved_orders(orders, symbol):
         if order.status not in terminal_statuses:
             return True
     return False
+
+def get_open_orders(symbol=None):
+
+    if symbol is not None and not isinstance(symbol, str):
+        raise TypeError("Symbol needs to be a string or None")
+
+    request = GetOrdersRequest(
+        status=QueryOrderStatus.OPEN,
+        symbols=[symbol] if symbol is not None else None
+    )
+
+    orders = trading_client.get_orders(filter=request)
+
+    return orders
