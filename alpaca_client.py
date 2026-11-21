@@ -252,3 +252,32 @@ def get_open_orders(symbol=None):
     orders = trading_client.get_orders(filter=request)
 
     return orders
+
+def get_position_snapshot(symbol: str):
+
+    if not isinstance(symbol, str):
+        raise TypeError("Symbol needs to be a string")
+
+    positions = get_positions()
+    orders = get_open_orders(symbol)
+
+    quantity = Decimal("0")
+
+    for position in positions:
+        if position.symbol != symbol:
+            continue
+        quantity = Decimal(position.qty)
+        dictionary = {
+                "symbol": symbol,
+                "current_qty": quantity,
+                "open_orders": orders
+        }
+
+        return dictionary
+
+    dictionary = {
+            "symbol": symbol,
+            "current_qty": quantity,
+            "open_orders": []
+    }
+    return dictionary

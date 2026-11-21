@@ -1,9 +1,9 @@
 import unittest
 from alpaca.common.exceptions import APIError
-from alpaca.trading.enums import OrderStatus, OrderSide
+from alpaca.trading.enums import OrderStatus, OrderSide, QueryOrderStatus
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action, has_unresolved_orders
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action, has_unresolved_orders, get_open_orders
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -827,3 +827,54 @@ class TestAlpacaClient(unittest.TestCase):
         )
 
         self.assertEqual(result, True)
+
+    def test_get_open_orders(self):
+
+        #Initialize Magic Mock
+        fake_order_1 = MagicMock()
+        fake_order_2 = MagicMock()
+
+        fake_orders = [fake_order_1, fake_order_2]
+
+        fake_order_1.symbol = "SPY"
+        fake_order_1.qty = 5000
+        fake_order_2.symbol = "SPY"
+        fake_order_2.qty = 6000
+
+        with patch("alpaca_client.trading_client.get_orders") as mock_orders:
+            mock_orders.return_value = fake_orders
+
+            result = get_open_orders()
+
+            self.assertEqual(result, fake_orders)
+            mock_orders.assert_called_once()
+
+            request = mock_orders.call_args.kwargs["filter"]
+
+            self.assertEqual(request.status, QueryOrderStatus.OPEN)
+            self.assertIsNone(request.symbols)
+
+    def test_get_open_orders_SPY_filter(self):
+
+        #Initialize Magic Mock
+        fake_order_1 = MagicMock()
+        fake_order_2 = MagicMock()
+
+        fake_orders = [fake_order_1, fake_order_2]
+
+        fake_order_1.symbol = "SPY"
+        fake_order_1.qty = 5000
+        fake_order_2.symbol = "SPY"
+        fake_order_2.qty = 6000
+
+        with patch("alpaca_client.trading_client.get_orders") as mock_orders:
+            mock_orders.return_value = fake_orders
+
+            result = get_open_orders("SPY")
+
+            self.assertEqual(result, fake_orders)
+            mock_orders.assert_called_once()
+
+            request = mock_orders.call_args.kwargs["filter"]
+
+            self.assertEqual(request.symbols, ["SPY"])
