@@ -3,7 +3,7 @@ from alpaca.common.exceptions import APIError
 from alpaca.trading.enums import OrderStatus, OrderSide, QueryOrderStatus
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action, has_unresolved_orders, get_open_orders, get_position_snapshot
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action, has_unresolved_orders, get_open_orders, get_position_snapshot, evaluate_position
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -955,3 +955,77 @@ class TestAlpacaClient(unittest.TestCase):
             #Verify our helper functions were called
             mock_positions.assert_called_once_with()
             mock_orders.assert_called_once_with("SPY")
+
+    def test_snapshot_position_api_error(self):
+        with patch("alpaca_client.get_all_positions") as mock_positions:
+            mock_positions.side_effect = APIError({
+                "code": 500,
+                "message": "Simulated API failure"
+            })
+
+            with self.assertRaises(APIError):
+                get_position_snapshot("SPY")
+
+    
+    def test_evaluate_position_buy(self):
+        fake_snapshot = {
+            "symbol": "SPY",
+            "current_qty": Decimal("4"),
+            "open_orders": []
+        }
+
+        with patch("alpaca_client.get_position_snapshot") as mock_snapshot:
+            mock_snapshot.return_value = fake_snapshot
+
+            result = evaluate_position("SPY", Decimal("10"))
+
+            self.assertEqual(result["symbol"], "SPY")
+            self.assertEqual(result["target_qty"], Decimal("10"))
+            self.assertEqual(result["current_qty"], Decimal("4"))
+            self.assertEqual(result["action"], "BUY")
+            self.assertEqual(result["action_qty"], Decimal("6"))
+
+            mock_snapshot.assert_called_once_with("SPY")
+
+
+    def test_evaluate_position_sell(self):
+        fake_snapshot = {
+            "symbol": "SPY",
+            "current_qty": Decimal("10"),
+            "open_orders": []
+        }
+
+        with patch("alpaca_client.get_position_snapshot") as mock_snapshot:
+            mock_snapshot.return_value = fake_snapshot
+
+            result = evaluate_position("SPY", Decimal("4"))
+
+            self.assertEqual(result["symbol"], "SPY")
+            self.assertEqual(result["target_qty"], Decimal("4"))
+            self.assertEqual(result["current_qty"], Decimal("10"))
+            self.assertEqual(result["action"], "SELL")
+            self.assertEqual(result["action_qty"], Decimal("6"))
+
+            mock_snapshot.assert_called_once_with("SPY")
+
+
+    def test_evaluate_position_hold(self):
+        fake_snapshot = {
+            "symbol": "SPY",
+            "current_qty": Decimal("10"),
+            "open_orders": []
+        }
+
+        with patch("alpaca_client.get_position_snapshot") as mock_snapshot:
+            mock_snapshot.return_value = fake_snapshot
+
+            result = evaluate_position("SPY", Decimal("10"))
+
+            self.assertEqual(result["symbol"], "SPY")
+            self.assertEqual(result["target_qty"], Decimal("10"))
+            self.assertEqual(result["current_qty"], Decimal("10"))
+            self.assertEqual(result["action"], "HOLD")
+            self.assertEqual(result["action_qty"], Decimal("0"))
+
+            mock_snapshot.assert_called_once_with("SPY")
+

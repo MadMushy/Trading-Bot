@@ -274,3 +274,34 @@ def get_position_snapshot(symbol: str):
             "open_orders": orders
     }
     return dictionary
+
+def evaluate_position(symbol, target_qty):
+
+    try:
+        target_qty = Decimal(str(target_qty))
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise ValueError("Invalid target quantity") from exc
+
+    if not target_qty.is_finite() or target_qty < 0:
+        raise ValueError("Target quantity must be nonnegative and finite")
+
+    #Take snapshot of current state
+    snapshot = get_position_snapshot(symbol)
+
+    #Extract current quantity and any orders from snapshot
+    current_qty = snapshot["current_qty"]
+    open_orders = snapshot["open_orders"]
+
+    #Determine action and split touple
+    action, action_qty = determine_order_action(target_qty, current_qty, open_orders, symbol)
+
+    #Construct a summary of the bots decision
+    action_dict = {
+            "symbol": symbol,
+            "target_qty": target_qty,
+            "current_qty": current_qty,
+            "action": action,
+            "action_qty": action_qty
+    }
+
+    return action_dict
