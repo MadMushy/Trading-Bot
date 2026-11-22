@@ -3,7 +3,7 @@ from alpaca.common.exceptions import APIError
 from alpaca.trading.enums import OrderStatus, OrderSide, QueryOrderStatus
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
-from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action, has_unresolved_orders, get_open_orders
+from alpaca_client import get_all_positions, create_market_order, submit_order, is_valid_uuid, get_order_by_id, get_order_by_client_id, is_order_filled, get_remaining_quantity, get_active_remaining_quantity, summarize_order, calculate_position_difference, calculate_pending_order_quantities, reconcile_position, determine_order_action, has_unresolved_orders, get_open_orders, get_position_snapshot
 
 class TestAlpacaClient(unittest.TestCase):
 
@@ -878,3 +878,80 @@ class TestAlpacaClient(unittest.TestCase):
             request = mock_orders.call_args.kwargs["filter"]
 
             self.assertEqual(request.symbols, ["SPY"])
+
+    def test_get_position_snapshot_with_position(self):
+
+        #Create a position
+        fake_position =MagicMock()
+        fake_position.symbol = "SPY"
+        fake_position.qty = "10"
+
+        #Mock both helper functions
+        with patch("alpaca_client.get_all_positions") as mock_positions, patch("alpaca_client.get_open_orders") as mock_orders:
+
+            mock_positions.return_value = [fake_position]
+            mock_orders.return_value = []
+
+            #Call function
+            result = get_position_snapshot("SPY")
+
+            #Verify return dictionary
+            self.assertEqual(result["symbol"], "SPY")
+            self.assertEqual(result["current_qty"], Decimal("10"))
+            self.assertEqual(result["open_orders"], [])
+
+            #Verify our helper functions were called
+            mock_positions.assert_called_once_with()
+            mock_orders.assert_called_once_with("SPY")
+
+    def test_get_position_snapshot_with_position_QQQ(self):
+
+        #Create a position
+        fake_position =MagicMock()
+        fake_position.symbol = "QQQ"
+        fake_position.qty = "10"
+
+        #Mock both helper functions
+        with patch("alpaca_client.get_all_positions") as mock_positions, patch("alpaca_client.get_open_orders") as mock_orders:
+
+            mock_positions.return_value = [fake_position]
+            mock_orders.return_value = []
+
+            #Call function
+            result = get_position_snapshot("SPY")
+
+            #Verify return dictionary
+            self.assertEqual(result["symbol"], "SPY")
+            self.assertEqual(result["current_qty"], Decimal("0"))
+            self.assertEqual(result["open_orders"], [])
+
+            #Verify our helper functions were called
+            mock_positions.assert_called_once_with()
+            mock_orders.assert_called_once_with("SPY")
+
+    def test_get_position_snapshot_with_position_no_current_but_active(self):
+
+        #Create a position
+        fake_order =MagicMock()
+        fake_order.symbol = "SPY"
+        fake_order.qty = "5"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+
+        #Mock both helper functions
+        with patch("alpaca_client.get_all_positions") as mock_positions, patch("alpaca_client.get_open_orders") as mock_orders:
+
+            mock_positions.return_value = []
+            mock_orders.return_value = [fake_order]
+
+            #Call function
+            result = get_position_snapshot("SPY")
+
+            #Verify return dictionary
+            self.assertEqual(result["symbol"], "SPY")
+            self.assertEqual(result["current_qty"], Decimal("0"))
+            self.assertEqual(result["open_orders"], [fake_order])
+
+            #Verify our helper functions were called
+            mock_positions.assert_called_once_with()
+            mock_orders.assert_called_once_with("SPY")

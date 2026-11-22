@@ -258,26 +258,19 @@ def get_position_snapshot(symbol: str):
     if not isinstance(symbol, str):
         raise TypeError("Symbol needs to be a string")
 
-    positions = get_positions()
+    positions = get_all_positions()
     orders = get_open_orders(symbol)
 
     quantity = Decimal("0")
 
     for position in positions:
-        if position.symbol != symbol:
-            continue
-        quantity = Decimal(position.qty)
-        dictionary = {
-                "symbol": symbol,
-                "current_qty": quantity,
-                "open_orders": orders
-        }
-
-        return dictionary
-
+        if position.symbol == symbol:
+            quantity = Decimal(position.qty)
+            break
+        
     dictionary = {
             "symbol": symbol,
             "current_qty": quantity,
-            "open_orders": []
+            "open_orders": orders
     }
     return dictionary
