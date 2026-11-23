@@ -1029,3 +1029,31 @@ class TestAlpacaClient(unittest.TestCase):
 
             mock_snapshot.assert_called_once_with("SPY")
 
+    def test_evaluate_position_pending_order_wait(self):
+        
+        fake_order = MagicMock()
+        fake_order.symbol = "SPY"
+        fake_order.side = OrderSide.BUY
+        fake_order.status = OrderStatus.NEW
+        fake_order.qty = "3"
+        fake_order.filled_qty = "0"
+
+        fake_snapshot = {
+            "symbol": "SPY",
+            "current_qty": Decimal("4"),
+            "open_orders": [fake_order]
+        }
+
+        with patch("alpaca_client.get_position_snapshot") as mock_snapshot:
+            mock_snapshot.return_value = fake_snapshot
+
+            result = evaluate_position("SPY", Decimal("10"))
+
+            self.assertEqual(result["symbol"], "SPY")
+            self.assertEqual(result["target_qty"], Decimal("10"))
+            self.assertEqual(result["current_qty"], Decimal("4"))
+            self.assertEqual(result["action"], "WAIT")
+            self.assertEqual(result["action_qty"], Decimal("0"))
+
+            mock_snapshot.assert_called_once_with("SPY")
+
