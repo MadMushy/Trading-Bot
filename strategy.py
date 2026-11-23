@@ -25,8 +25,16 @@ def generate_signal(prices, fast_period=5, slow_period=20):
 	else:
 		raise ValueError("Invalid period. Must be greater then 0 and slow period greater than fast")
 
+def update_strategy_state(signal, previous_state):
 
+    if previous_state not in ("INVESTED", "OUT"):
+        raise ValueError("Unknown previous state")
+    if signal not in ("BUY", "SELL", "HOLD"):
+        raise ValueError("Unknown signal")
 
-
-
-
+    if signal == "BUY":
+        return "INVESTED"
+    elif signal == "SELL":
+        return "OUT"
+    else:
+        return previous_state
